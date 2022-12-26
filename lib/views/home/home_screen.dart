@@ -6,6 +6,7 @@ import 'package:delicious_app/views/home/notification_screen.dart';
 import 'package:delicious_app/views/home/sub_category_screen.dart';
 import 'package:delicious_app/views/humburger_items/contact_us_screen.dart';
 import 'package:delicious_app/widget/humburger_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -64,6 +65,26 @@ class _HomeScreenState extends State<HomeScreen> {
     print(longitude);
   }
 
+  List cartData = [];
+  _fetchCartList() {
+    FirebaseFirestore.instance
+        .collection('Cart')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("products")
+        .snapshots()
+        .listen((event) {
+      setState(() {
+        cartData.clear();
+      });
+      for (var doc in event.docs) {
+        setState(() {
+          cartData.add(doc.data());
+        });
+      }
+      log(cartList.toString());
+    });
+  }
+
   @override
   void initState() {
     fillimagelist();
@@ -71,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     determinePosition();
     fetchCurrentLatLong();
     fetchToken();
+    _fetchCartList();
     super.initState();
   }
 
@@ -116,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _globalKey,
         drawer: MyDrawer(),
         bottomNavigationBar: Visibility(
-          visible: cartList.isNotEmpty ? true : false,
+          visible: cartData.isNotEmpty ? true : false,
           child: Container(
             height: height(context) * 0.1,
             width: width(context),
@@ -138,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.shopping_cart_outlined),
-                  title: Text('${cartList.length} Items'),
+                  title: Text('${cartData.length} Items'),
                   trailing: Container(
                     width: width(context) * 0.4,
                     child: CustomButton(
@@ -537,14 +559,15 @@ class _HomeBottomCheckedWidgetState extends State<HomeBottomCheckedWidget> {
               ],
             ),
           ),
-          Image.asset('assets/images/homebottomimg.png'),
+          addVerticalSpace(20),
+          Image.asset('assets/images/homebottomimg.jpg'),
         ],
       ),
     );
   }
 }
 
-class HomeProductListWidget extends StatelessWidget {
+class HomeProductListWidget extends StatefulWidget {
   final int category;
 
   HomeProductListWidget({
@@ -552,303 +575,325 @@ class HomeProductListWidget extends StatelessWidget {
     required this.category,
   }) : super(key: key);
 
-  final Stream<QuerySnapshot> todaysDeals =
-      FirebaseFirestore.instance.collection('TodaysDeal').snapshots();
-  final Stream<QuerySnapshot> bestSellers =
-      FirebaseFirestore.instance.collection('BestSellers').snapshots();
+  @override
+  State<HomeProductListWidget> createState() => _HomeProductListWidgetState();
+}
+
+class _HomeProductListWidgetState extends State<HomeProductListWidget> {
+  // final Stream<QuerySnapshot> todaysDeals =
+  //     FirebaseFirestore.instance.collection('TodaysDeal').snapshots();
+
+  // final Stream<QuerySnapshot> bestSellers =
+  //     FirebaseFirestore.instance.collection('BestSellers').snapshots();
+
+  List data = [];
+  _fetchTodayData() async {
+    await FirebaseFirestore.instance
+        .collection('TodaysDeal')
+        .get()
+        .then((value) {
+      setState(() {
+        data = value.docs;
+      });
+    });
+  }
+
+  _fetchBestSellerData() async {
+    await FirebaseFirestore.instance
+        .collection('BestSellers')
+        .get()
+        .then((value) {
+      setState(() {
+        data = value.docs;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    widget.category == 0 ? _fetchTodayData() : _fetchBestSellerData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: category == 0 ? todaysDeals : bestSellers,
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text("Something wrong occurred");
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
-          }
-
-          final data = snapshot.requireData;
-
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            itemCount: data.size,
-            itemBuilder: (BuildContext context, int index) {
-              return InkWell(
-                onTap: () {
-                  if (category == 0) {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (ctx) => ProductScreen(
-                                  name: data.docs[index]['name'],
-                                  id: data.docs[index]['id'],
-                                  productType: 'today',
-                                )));
-                  } else {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (ctx) => ProductScreen(
-                                  name: data.docs[index]['name'],
-                                  id: data.docs[index]['id'],
-                                  productType: 'best',
-                                )));
-                  }
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(4),
-                  decoration: shadowDecoration(15, 5),
-                  width: width(context) * 0.5,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: height(context) * 0.13,
-                        width: width(context),
-                        child: Image.network(
-                          data.docs[index]['image'],
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 5),
-                        // height: height(context) * 0.17,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: width(context) * 0.3,
-                                  child: Text(
-                                    data.docs[index]['name'],
-                                    style: bodyText14w600(color: black),
-                                  ),
-                                ),
-                                Container(
-                                  decoration: myFillBoxDecoration(0,
-                                      const Color.fromRGBO(251, 188, 4, 1), 5),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text(
-                                        data.docs[index]['ratings'].toString(),
-                                        style: bodyText12Small(color: white),
-                                      ),
-                                      Icon(
-                                        Icons.star,
-                                        size: 15,
-                                        color: white,
-                                      )
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.timer,
-                                  size: 18,
-                                  color: Colors.yellow,
-                                ),
-                                Text(
-                                  '${data.docs[index]['timing']} mins   <1 Km',
-                                  style: bodyText11Small(color: Colors.black38),
-                                )
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.monitor_weight,
-                                  size: 18,
-                                  color: Colors.red,
-                                ),
-                                Text(
-                                  '${data.docs[index]['weight']}gms I \nNet: ${data.docs[index]['netWeight']}gms',
-                                  style: bodyText11Small(color: Colors.black38),
-                                )
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Rs. ${data.docs[index]['price']}',
-                                  style: bodytext12Bold(color: black),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration:
-                                      myFillBoxDecoration(0, primary, 5),
-                                  child: Center(
-                                    child: AddtoCart(
-                                      vendorId: data.docs[index]['vendorID'],
-                                      id: data.docs[index]['id'],
-                                      insideProduct: false,
-                                      price: data.docs[index]['price'],
-                                      name: data.docs[index]['name'],
-                                      desc: data.docs[index]['discription'],
-                                      stock: data.docs[index]['stock'],
-                                      imageURL: data.docs[index]['image'],
-                                      weight: data.docs[index]['weight'],
-                                      netWeight: data.docs[index]['netWeight'],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
+      scrollDirection: Axis.horizontal,
+      itemCount: data.length,
+      itemBuilder: (BuildContext context, int index) {
+        return InkWell(
+          onTap: () {
+            if (widget.category == 0) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (ctx) => ProductScreen(
+                            name: data[index]['name'],
+                            id: data[index]['id'],
+                            productType: 'today',
+                          )));
+            } else {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (ctx) => ProductScreen(
+                            name: data[index]['name'],
+                            id: data[index]['id'],
+                            productType: 'best',
+                          )));
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: shadowDecoration(15, 5),
+            width: width(context) * 0.5,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: height(context) * 0.13,
+                  width: width(context),
+                  child: Image.network(
+                    data[index]['image'],
+                    fit: BoxFit.fill,
                   ),
                 ),
-              )
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 5),
+                  // height: height(context) * 0.17,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: width(context) * 0.3,
+                            child: Text(
+                              data[index]['name'],
+                              style: bodyText14w600(color: black),
+                            ),
+                          ),
+                          Container(
+                            decoration: myFillBoxDecoration(
+                                0, const Color.fromRGBO(251, 188, 4, 1), 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  data[index]['ratings'].toString(),
+                                  style: bodyText12Small(color: white),
+                                ),
+                                Icon(
+                                  Icons.star,
+                                  size: 15,
+                                  color: white,
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.timer,
+                            size: 18,
+                            color: Colors.yellow,
+                          ),
+                          Text(
+                            '${data[index]['timing']} mins   <1 Km',
+                            style: bodyText11Small(color: Colors.black38),
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.monitor_weight,
+                            size: 18,
+                            color: Colors.red,
+                          ),
+                          Text(
+                            '${data[index]['weight']}gms I \nNet: ${data[index]['netWeight']}gms',
+                            style: bodyText11Small(color: Colors.black38),
+                          )
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Rs. ${data[index]['price']}',
+                            style: bodytext12Bold(color: black),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: myFillBoxDecoration(0, primary, 5),
+                            child: Center(
+                              child: AddtoCart(
+                                vendorId: data[index]['vendorID'],
+                                id: data[index]['id'],
+                                insideProduct: false,
+                                price: data[index]['price'],
+                                name: data[index]['name'],
+                                desc: data[index]['discription'],
+                                stock: data[index]['stock'],
+                                imageURL: data[index]['image'],
+                                weight: data[index]['weight'],
+                                netWeight: data[index]['netWeight'],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        )
 
-                  /*     ProductTile(
-                name: data.docs[index]['name'],
-                timing: data.docs[index]['timing'],
-                weight: data.docs[index]['weight'],
-                netWeight: data.docs[index]['netWeight'],
-                price: data.docs[index]['price'],
-                rating: data.docs[index]['ratings'],
-                vendorID: data.docs[index]['vendorID'],
-                imageURL: data.docs[index]['image'],
-                id: data.docs[index]['id'],
-                desc: data.docs[index]['desc'],
-                stock: data.docs[index]['stock'],
+            /*     ProductTile(
+                name: data[index]['name'],
+                timing: data[index]['timing'],
+                weight: data[index]['weight'],
+                netWeight: data[index]['netWeight'],
+                price: data[index]['price'],
+                rating: data[index]['ratings'],
+                vendorID: data[index]['vendorID'],
+                imageURL: data[index]['image'],
+                id: data[index]['id'],
+                desc: data[index]['desc'],
+                stock: data[index]['stock'],
               )*/
 
-                  ;
-            },
-          );
-        });
-    // ListView.builder(
-    //     itemCount: prodList.length,
-    //     scrollDirection: Axis.horizontal,
-    //     itemBuilder: (context, index) {
-    //       return InkWell(
-    //         onTap: () => Navigator.push(
-    //             context, MaterialPageRoute(builder: (ctx) => ProductScreen(name: "",id: "",))),
-    //         child: Container(
-    //           margin: EdgeInsets.only(left: 7, right: 20, bottom: 7, top: 7),
-    //           // color: ligthRed,
-    //           height: height(context) * 0.3,
-    //           width: width(context) * 0.45,
-    //           decoration: shadowDecoration(15, 5),
-    //           child: Column(
-    //             children: [
-    //               SizedBox(
-    //                 height: height(context) * 0.13,
-    //                 width: width(context) * 0.45,
-    //                 child: Image.asset(
-    //                   prodList[index],
-    //                   fit: BoxFit.fill,
-    //                 ),
-    //               ),
-    //               Container(
-    //                 padding: EdgeInsets.symmetric(horizontal: 5),
-    //                 height: height(context) * 0.15,
-    //                 child: Column(
-    //                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //                   children: [
-    //                     Row(
-    //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                       children: [
-    //                         SizedBox(
-    //                           width: width(context) * 0.2,
-    //                           child: Text(
-    //                             'Goat Curry Cut',
-    //                             style: bodyText14w600(color: black),
-    //                           ),
-    //                         ),
-    //                         Container(
-    //                           height: 21,
-    //                           width: width(context) * 0.15,
-    //                           decoration: myFillBoxDecoration(
-    //                               0, const Color.fromRGBO(251, 188, 4, 1), 5),
-    //                           child: Row(
-    //                             mainAxisAlignment:
-    //                                 MainAxisAlignment.spaceEvenly,
-    //                             children: [
-    //                               Text(
-    //                                 '4.4',
-    //                                 style: bodyText12Small(color: white),
-    //                               ),
-    //                               Icon(
-    //                                 Icons.star,
-    //                                 size: 15,
-    //                                 color: white,
-    //                               )
-    //                             ],
-    //                           ),
-    //                         )
-    //                       ],
-    //                     ),
-    //                     Row(
-    //                       children: [
-    //                         const Icon(
-    //                           Icons.timer,
-    //                           size: 18,
-    //                           color: Colors.yellow,
-    //                         ),
-    //                         Text(
-    //                           '20 mins    <1 Km',
-    //                           style: bodyText11Small(color: Colors.black38),
-    //                         )
-    //                       ],
-    //                     ),
-    //                     Row(
-    //                       children: [
-    //                         const Icon(
-    //                           Icons.monitor_weight,
-    //                           size: 18,
-    //                           color: Colors.red,
-    //                         ),
-    //                         Text(
-    //                           '900gms I Net: 450gms',
-    //                           style: bodyText11Small(color: Colors.black38),
-    //                         )
-    //                       ],
-    //                     ),
-    //                     Row(
-    //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                       children: [
-    //                         Text(
-    //                           'Rs. 200',
-    //                           style: bodytext12Bold(color: black),
-    //                         ),
-    //                         Container(
-    //                           height: 21,
-    //                           width: width(context) * 0.15,
-    //                           decoration: myFillBoxDecoration(0, primary, 5),
-    //                           child: Center(
-    //                             child: Text(
-    //                               'ADD +',
-    //                               style: bodyText11Small(color: white),
-    //                             ),
-    //                           ),
-    //                         )
-    //                       ],
-    //                     ),
-    //                   ],
-    //                 ),
-    //               )
-    //             ],
-    //           ),
-    //         ),
-    //       );
-    //     });
+            ;
+      },
+    );
   }
+  // ListView.builder(
+  //     itemCount: prodList.length,
+  //     scrollDirection: Axis.horizontal,
+  //     itemBuilder: (context, index) {
+  //       return InkWell(
+  //         onTap: () => Navigator.push(
+  //             context, MaterialPageRoute(builder: (ctx) => ProductScreen(name: "",id: "",))),
+  //         child: Container(
+  //           margin: EdgeInsets.only(left: 7, right: 20, bottom: 7, top: 7),
+  //           // color: ligthRed,
+  //           height: height(context) * 0.3,
+  //           width: width(context) * 0.45,
+  //           decoration: shadowDecoration(15, 5),
+  //           child: Column(
+  //             children: [
+  //               SizedBox(
+  //                 height: height(context) * 0.13,
+  //                 width: width(context) * 0.45,
+  //                 child: Image.asset(
+  //                   prodList[index],
+  //                   fit: BoxFit.fill,
+  //                 ),
+  //               ),
+  //               Container(
+  //                 padding: EdgeInsets.symmetric(horizontal: 5),
+  //                 height: height(context) * 0.15,
+  //                 child: Column(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //                   children: [
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         SizedBox(
+  //                           width: width(context) * 0.2,
+  //                           child: Text(
+  //                             'Goat Curry Cut',
+  //                             style: bodyText14w600(color: black),
+  //                           ),
+  //                         ),
+  //                         Container(
+  //                           height: 21,
+  //                           width: width(context) * 0.15,
+  //                           decoration: myFillBoxDecoration(
+  //                               0, const Color.fromRGBO(251, 188, 4, 1), 5),
+  //                           child: Row(
+  //                             mainAxisAlignment:
+  //                                 MainAxisAlignment.spaceEvenly,
+  //                             children: [
+  //                               Text(
+  //                                 '4.4',
+  //                                 style: bodyText12Small(color: white),
+  //                               ),
+  //                               Icon(
+  //                                 Icons.star,
+  //                                 size: 15,
+  //                                 color: white,
+  //                               )
+  //                             ],
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Row(
+  //                       children: [
+  //                         const Icon(
+  //                           Icons.timer,
+  //                           size: 18,
+  //                           color: Colors.yellow,
+  //                         ),
+  //                         Text(
+  //                           '20 mins    <1 Km',
+  //                           style: bodyText11Small(color: Colors.black38),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Row(
+  //                       children: [
+  //                         const Icon(
+  //                           Icons.monitor_weight,
+  //                           size: 18,
+  //                           color: Colors.red,
+  //                         ),
+  //                         Text(
+  //                           '900gms I Net: 450gms',
+  //                           style: bodyText11Small(color: Colors.black38),
+  //                         )
+  //                       ],
+  //                     ),
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         Text(
+  //                           'Rs. 200',
+  //                           style: bodytext12Bold(color: black),
+  //                         ),
+  //                         Container(
+  //                           height: 21,
+  //                           width: width(context) * 0.15,
+  //                           decoration: myFillBoxDecoration(0, primary, 5),
+  //                           child: Center(
+  //                             child: Text(
+  //                               'ADD +',
+  //                               style: bodyText11Small(color: white),
+  //                             ),
+  //                           ),
+  //                         )
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               )
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     });
+
 }
 
 // category tile

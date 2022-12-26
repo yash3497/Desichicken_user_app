@@ -410,8 +410,12 @@ class _PriceBoxState extends State<PriceBox> {
           ),
           cartList.isNotEmpty
               ? Text(
-                  'Rs. ${cartList.isNotEmpty && widget.cartamount <= 400 ? deliveryFee : 0}',
-                  style: bodyText14w600(color: black),
+                  'Rs. $deliveryFee',
+                  style: bodyText14w600(
+                      color: black,
+                      isShowing: cartList.isNotEmpty && widget.cartamount > 400
+                          ? true
+                          : false),
                 )
               : SizedBox(),
           cartList.isNotEmpty

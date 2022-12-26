@@ -13,7 +13,6 @@ bool isToggle = false;
 bool isPremium = false;
 bool isPosition = false;
 
-
 const textColor = Colors.black;
 const textLightColor = Color(0xFF888888);
 
@@ -22,8 +21,8 @@ String SDate = DateFormat('EEEE,d,MMM,yyy').format(DateTime.now());
 
 TextStyle bodyText1(
     {Color color = textColor,
-      required context,
-      TextDecoration textDecoration = TextDecoration.none}) {
+    required context,
+    TextDecoration textDecoration = TextDecoration.none}) {
   return TextStyle(
       fontWeight: FontWeight.w400,
       fontSize: 13,
@@ -100,8 +99,17 @@ BoxDecoration myFillBoxDecoration(double width, Color color, double radius) {
   );
 }
 
-TextStyle bodyText14w600({required Color color}) {
-  return TextStyle(fontSize: 14, color: color, fontWeight: FontWeight.w600);
+TextStyle bodyText14w600({required Color color, bool isShowing = false}) {
+  return TextStyle(
+      fontSize: 14,
+      color: isShowing ? Colors.grey : color,
+      fontWeight: FontWeight.w600,
+      decorationColor: Colors.red,
+      decorationStyle: TextDecorationStyle.solid,
+      decorationThickness: 2,
+      decoration: TextDecoration.combine([
+        isShowing ? TextDecoration.lineThrough : TextDecoration.none,
+      ]));
 }
 
 TextStyle bodyText14normal({required Color color}) {
