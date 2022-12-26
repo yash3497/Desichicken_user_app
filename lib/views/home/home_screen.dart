@@ -453,7 +453,7 @@ class _HomeBottomCheckedWidgetState extends State<HomeBottomCheckedWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: width(context),
-      height: height(context) * 0.635,
+      height: height(context) * 0.9,
       color: Color(0xFFF3F5F2),
       child: Column(
         children: [
@@ -559,7 +559,13 @@ class _HomeBottomCheckedWidgetState extends State<HomeBottomCheckedWidget> {
               ],
             ),
           ),
-          addVerticalSpace(20),
+          addVerticalSpace(10),
+          Center(
+              child: Image.asset(
+            'assets/images/mainlogo.png',
+            height: 150,
+          )),
+          addVerticalSpace(10),
           Image.asset('assets/images/homebottomimg.jpg'),
         ],
       ),
