@@ -20,6 +20,7 @@ class AddtoCart extends StatefulWidget {
   final num stock;
   final String vendorId;
   final bool insideProduct;
+  final String catId;
 
   const AddtoCart(
       {super.key,
@@ -32,7 +33,9 @@ class AddtoCart extends StatefulWidget {
       required this.stock,
       required this.imageURL,
       required this.weight,
-      required this.netWeight});
+      required this.netWeight,
+      required this.catId,
+      });
 
   @override
   State<AddtoCart> createState() => _AddtoCartState();
@@ -238,7 +241,9 @@ class _AddtoCartState extends State<AddtoCart> {
                       widget.desc,
                       widget.stock,
                       widget.weight,
-                      widget.netWeight);
+                      widget.netWeight,
+                  widget.catId,
+                  );
                   if (mounted)
                     setState(() {
                       _exist = true;

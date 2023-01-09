@@ -16,7 +16,9 @@ class CartServices {
       String desc,
       num stock,
       num weight,
-      num netWeight) {
+      num netWeight,
+      String catId,
+      ) {
     print("add to cart");
     cart.doc(FirebaseAuth.instance.currentUser!.uid).set({
       "customerID": FirebaseAuth.instance.currentUser!.uid,
@@ -38,6 +40,7 @@ class CartServices {
       "name": name,
       "desc": desc,
       'productQty': 1,
+      "catId":catId,
     });
   }
 

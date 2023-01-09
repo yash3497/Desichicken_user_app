@@ -161,6 +161,7 @@ class _MyCartScreenState extends State<MyCartScreen> {
                               weight: cartData.docs[index]['weight'],
                               netWeight: cartData.docs[index]['netWeight'],
                               cartList: cartData.docs,
+                              catId: cartData.docs[index]['catId'],
                             );
                           },
                         );
@@ -506,8 +507,22 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     var orderId = "${DateTime.now().microsecondsSinceEpoch}";
     sendNotification(orderId, "New Order Successful", token);
-    for (var doc in vendorTokenList) {
-      FirebaseFirestore.instance.collection("Orders").doc(orderId).set({
+    Map aa = {};
+    for(var i in cartList){
+      String vId = i['vendorId'];
+      if(aa[vId]!=null){
+        List temp = aa[vId];
+        temp.add(i);
+        aa[vId] =  temp;
+      }else{
+        List temp = [];
+        temp.add(i);
+        aa[vId] =  temp;
+      }
+    }
+    print(aa);
+    for(var j in aa.keys){
+      FirebaseFirestore.instance.collection("Orders").doc().set({
         "pickupAddress": "",
         "deliveryAddress": currentAddress,
         "uid": FirebaseAuth.instance.currentUser?.uid,
@@ -531,53 +546,97 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
             ((widget.cartamount) * (discount / 100)) +
             40),
         "createdAt": Timestamp.now(),
-        "items": cartList,
+        "items": aa[j],
         "discount": (widget.cartamount) * (discount / 100),
         "paymentId": response.paymentId!,
         "paymentMethod": "ONLINE",
         "orderId": orderId,
         "status": "waiting", // whereIn: ["accepted", 'dispatched', 'picked']
-        "vendorId": "",
+        "vendorId": j,
         "deliveryPerson": "",
         "deliveryDate": SDate,
         "deliveryTime": Stime ?? DateTime.now().toString(),
         "vendorNumber": vendorNumber,
         "rating": "",
-      }).then((value) {
-        FirebaseFirestore.instance
-            .collection('Cart')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection("products")
-            .get()
-            .then((value) {
-          final batch = FirebaseFirestore.instance.batch();
-
-          for (var doc in value.docs) {
-            batch.delete(doc.reference);
-          }
-          batch.commit();
-        });
-        FirebaseFirestore.instance.collection("Payments").doc(orderId).set({
-          "orderId": orderId,
-          "paymentId": response.paymentId!,
-          "time": Timestamp.now(),
-          "name": userDetails["Name"] ?? "",
-          "amount": ((widget.cartamount) -
-              ((widget.cartamount) * (discount / 100)) +
-              40),
-          "vendorId": "",
-          "uid": FirebaseAuth.instance.currentUser?.uid,
-        }).then((value) {
-          Fluttertoast.showToast(msg: "Order Successfully");
-
-          sendNotification(
-              "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
-        });
-
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
       });
     }
+    for (var doc in vendorTokenList) {
+      sendNotification(
+          // "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
+          "New Order Received", "\n Desichikken" , doc.trim());
+    }
+    // FirebaseFirestore.instance.collection("Orders").doc(orderId).set({
+    //   "pickupAddress": "",
+    //   "deliveryAddress": currentAddress,
+    //   "uid": FirebaseAuth.instance.currentUser?.uid,
+    //   "customerName": userDetails["Name"] ?? "",
+    //   "customerPhone": userDetails["Number"] ?? "",
+    //   "customerLatlong": {"lat": latitude, "long": longitude},
+    //   "denied": [],
+    //   "rejectedBy": [],
+    //   "deniedBy": false,
+    //   "orderCompleted": false,
+    //   "orderAccepted": false,
+    //   "orderCancelled": false,
+    //   "orderReturn": false,
+    //   "orderProcess": false,
+    //   "orderAccept": false,
+    //   "orderShipped": false,
+    //   "deliveryFees": 50.0,
+    //   "isPaid": true,
+    //   "orderDenied": false,
+    //   "totalAmount": ((widget.cartamount) -
+    //       ((widget.cartamount) * (discount / 100)) +
+    //       40),
+    //   "createdAt": Timestamp.now(),
+    //   "items": cartList,
+    //   "discount": (widget.cartamount) * (discount / 100),
+    //   "paymentId": response.paymentId!,
+    //   "paymentMethod": "ONLINE",
+    //   "orderId": orderId,
+    //   "status": "waiting", // whereIn: ["accepted", 'dispatched', 'picked']
+    //   "vendorId": "",
+    //   "deliveryPerson": "",
+    //   "deliveryDate": SDate,
+    //   "deliveryTime": Stime ?? DateTime.now().toString(),
+    //   "vendorNumber": vendorNumber,
+    //   "rating": "",
+    // }).then((value) {
+      FirebaseFirestore.instance
+          .collection('Cart')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("products")
+          .get()
+          .then((value) {
+        final batch = FirebaseFirestore.instance.batch();
+
+        for (var doc in value.docs) {
+          batch.delete(doc.reference);
+        }
+        batch.commit();
+      });
+      FirebaseFirestore.instance.collection("Payments").doc(orderId).set({
+        "orderId": orderId,
+        "paymentId": response.paymentId!,
+        "time": Timestamp.now(),
+        "name": userDetails["Name"] ?? "",
+        "amount": ((widget.cartamount) -
+            ((widget.cartamount) * (discount / 100)) +
+            40),
+        "vendorId": "",
+        "uid": FirebaseAuth.instance.currentUser?.uid,
+      }).then((value) {
+        Fluttertoast.showToast(msg: "Order Successfully");
+
+        // sendNotification(
+        //     "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
+      });
+
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
+    // });
+
+
   }
 
   List<String> vendorTokenList = [];
@@ -591,6 +650,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         if (doc.data().keys.contains("latitude") &&
             doc.data().keys.contains("longitude") &&
             doc.data().keys.contains("token")) {
+          print(doc.data());
           log("distance : ${calculateDistance(latitude, longitude, doc["latitude"], doc["longitude"])}");
           if ((calculateDistance(
                   latitude, longitude, doc["latitude"], doc["longitude"])) <=
@@ -884,6 +944,7 @@ class CartTile extends StatefulWidget {
   final num netWeight;
   final bool insideProduct;
   final List cartList;
+  final String catId;
 
   const CartTile(
       {super.key,
@@ -896,7 +957,9 @@ class CartTile extends StatefulWidget {
       required this.insideProduct,
       required this.weight,
       required this.netWeight,
-      required this.cartList});
+      required this.cartList,
+      required this.catId
+      });
 
   @override
   State<CartTile> createState() => _CartTileState();
@@ -966,6 +1029,7 @@ class _CartTileState extends State<CartTile> {
                     imageURL: widget.imageURL,
                     weight: widget.weight,
                     netWeight: widget.netWeight,
+                    catId: widget.catId,
                   ),
                 ),
               ),

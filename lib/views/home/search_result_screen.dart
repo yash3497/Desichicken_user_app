@@ -181,7 +181,7 @@ final Stream<QuerySnapshot> results =
                                     ),
                               itemBuilder: (BuildContext context, int index) {
                        
-                                return ProductTile(name: data.docs[index]['name'], timing: data.docs[index]['timing'], weight:data.docs[index]['weight'], netWeight: data.docs[index]['netWeight'], price:data.docs[index]['price'], rating: data.docs[index]['ratings'], vendorID: data.docs[index]['vendorID'], imageURL: data.docs[index]['imageURL'],id: data.docs[index]['id'],desc: data.docs[index]['desc'],stock: data.docs[index]['stock'],);
+                                return ProductTile(name: data.docs[index]['name'], timing: data.docs[index]['timing'], weight:data.docs[index]['weight'], netWeight: data.docs[index]['netWeight'], price:data.docs[index]['price'], rating: data.docs[index]['ratings'], vendorID: data.docs[index]['vendorID'], imageURL: data.docs[index]['imageURL'],id: data.docs[index]['id'],desc: data.docs[index]['desc'],stock: data.docs[index]['stock'],catId: data.docs[index]['catId'],);
                               },
                             );
                                 

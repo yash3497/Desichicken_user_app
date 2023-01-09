@@ -32,6 +32,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
 
   @override
   void initState() {
+    getSubCats();
     fetchProducts();
     _fetchCartList();
     super.initState();
@@ -39,22 +40,45 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
 
   // fetch product
   List<dynamic> productList = [];
+  List subCats = [];
+  int selectedIndex = 0;
 
-  fetchProducts() {
-    firebaseFirestore
-        .collection("Products")
-        // .where("vendorId", isEqualTo: widget.vendorID)
-        .where("subCategoryId", isEqualTo: widget.subCategoryId)
-        .get()
-        .then((value) {
-      for (var doc in value.docs) {
-        log(doc.toString());
-        productList.add(doc.data());
-        if (mounted) {
-          setState(() {});
-        }
-      }
+  fetchProducts({String? sub}) {
+    setState(() {
+      productList.clear();
     });
+    print(sub);
+    if(sub!=null){
+      firebaseFirestore
+          .collection("Products")
+      // .where("vendorId", isEqualTo: widget.vendorID)
+          .where("categoryId", isEqualTo: widget.category )
+          .where("subCategoryId", isEqualTo:sub )
+          .get()
+          .then((value) {
+        for (var doc in value.docs) {
+          productList.add(doc.data());
+          if (mounted) {
+            setState(() {});
+          }
+        }
+      });
+    }else{
+      firebaseFirestore
+          .collection("Products")
+      // .where("vendorId", isEqualTo: widget.vendorID)
+          .where("categoryId", isEqualTo: widget.category)
+          .get()
+          .then((value) {
+        for (var doc in value.docs) {
+          productList.add(doc.data());
+          if (mounted) {
+            setState(() {});
+          }
+        }
+      });
+    }
+
   }
 
   _fetchCartList() {
@@ -73,6 +97,15 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
       }
       log(cartList.toString());
     });
+  }
+  getSubCats() async {
+    var b = await FirebaseFirestore.instance
+        .collection("SubCategories")
+        .where("categoryId", isEqualTo: widget.category)
+        .get();
+    subCats.add({"name":"All"});
+    subCats.addAll(b.docs);
+    setState(() {});
   }
 
   @override
@@ -105,6 +138,49 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
         ),
         body: Column(
           children: [
+            Container(
+              alignment: Alignment.center,
+              height: 40,
+              width: MediaQuery.of(context).size.width,
+              child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: subCats.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: (){
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                        fetchProducts(sub: index == 0?null:subCats[index]['subCategoryId']);
+                      },
+                      child: Card(
+
+                        elevation: 5,
+                        child: Container(
+                          color:selectedIndex == index ? Colors.red:null,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                             index == 0?const SizedBox():   SizedBox(
+                                  width: 30,
+                                  height: 35,
+                                  child: Image.network(
+                                    subCats[index]['image'],
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                SizedBox(
+                                    width: index == 0?50:null,
+                                    child: Center(child: Text(subCats[index]['name'],style: TextStyle(  color:selectedIndex == index ? Colors.white:null),))),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+            ),
             SizedBox(
               height: height(context) * 0.74,
               child: GridView.builder(
@@ -129,6 +205,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
                     id: productList[index]['id'] ?? "10",
                     desc: productList[index]['description'] ?? "",
                     stock: productList[index]['stock'],
+                    catId: productList[index]['categoryId'],
                   );
                 },
               ),
@@ -190,6 +267,7 @@ class ProductTile extends StatefulWidget {
   final num stock;
   final num price;
   final num rating;
+  final String catId;
 
   const ProductTile({
     super.key,
@@ -204,6 +282,7 @@ class ProductTile extends StatefulWidget {
     required this.id,
     required this.desc,
     required this.stock,
+    required this.catId,
   });
 
   @override
@@ -321,6 +400,7 @@ class _ProductTileState extends State<ProductTile> {
                             imageURL: widget.imageURL,
                             weight: widget.weight,
                             netWeight: widget.netWeight,
+                            catId: widget.catId,
                           ),
                         ),
                       )
