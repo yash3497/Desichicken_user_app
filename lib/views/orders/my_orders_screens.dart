@@ -4,6 +4,8 @@ import 'package:delicious_app/views/orders/order_status_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../widget/BottomNavBar.dart';
+
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
 
@@ -88,119 +90,72 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "My Orders",
-          style: bodyText16w600(color: Colors.black),
-        ),
-        shadowColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: height(context) * 0.04,
-            child: TabBar(
-                controller: _tabController,
-                isScrollable: false,
-                indicatorColor: primary,
-                indicatorWeight: 3,
-                indicatorSize: TabBarIndicatorSize.label,
-                labelColor: primary,
-                unselectedLabelColor: black.withOpacity(0.4),
-                labelStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                unselectedLabelStyle:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                tabs: const [
-                  Tab(
-                    text: 'Active Order',
-                  ),
-                  Tab(
-                    text: 'Completed',
-                  ),
-                  Tab(
-                    text: 'Cancelled',
-                  )
-                ]),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const BottomNavBar()));
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "My Orders",
+            style: bodyText16w600(color: Colors.black),
           ),
-          Expanded(
-              child: TabBarView(
-            controller: _tabController,
-            children: [
-              ListView.builder(
-                  itemCount: activeOrderList.length,
-                  itemBuilder: (context, index) {
-                    return MyOrdersDetails(
-                      status: 'Active',
-                      statusColor: primary,
-                      returnWidget: const SizedBox(),
-                      showDetailAndTrackButton: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => OrderStatusScreen(
-                                          productDetails:
-                                              activeOrderList[index],
-                                        )));
-                          },
-                          child: Text(
-                            'Show full details',
-                            style: bodyText14w600(color: primary),
-                          )),
-                      productDetails: activeOrderList[index],
-                    );
-                  }),
-              SizedBox(
-                height: height(context) * 0.8,
-                child: ListView.builder(
-                    itemCount: completedOrderList.length,
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => BottomNavBar()));
+              },
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.black,
+              )),
+          shadowColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
+        ),
+        body: Column(
+          children: [
+            SizedBox(
+              height: height(context) * 0.04,
+              child: TabBar(
+                  controller: _tabController,
+                  isScrollable: false,
+                  indicatorColor: primary,
+                  indicatorWeight: 3,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  labelColor: primary,
+                  unselectedLabelColor: black.withOpacity(0.4),
+                  labelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600),
+                  tabs: const [
+                    Tab(
+                      text: 'Active Order',
+                    ),
+                    Tab(
+                      text: 'Completed',
+                    ),
+                    Tab(
+                      text: 'Cancelled',
+                    )
+                  ]),
+            ),
+            Expanded(
+                child: TabBarView(
+              controller: _tabController,
+              children: [
+                ListView.builder(
+                    itemCount: activeOrderList.length,
                     itemBuilder: (context, index) {
                       return MyOrdersDetails(
-                        status: 'Completed',
-                        statusColor: Colors.green,
-                        returnWidget: Container(
-                          height: 25,
-                          width: width(context) * 0.25,
-                          decoration: myOutlineBoxDecoration(1, primary, 10),
-                          child: Center(
-                              child: Text(
-                            'Return',
-                            style: bodytext12Bold(color: primary),
-                          )),
-                        ),
-                        showDetailAndTrackButton: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => OrderStatusScreen(
-                                            productDetails:
-                                                completedOrderList[index],
-                                          )));
-                            },
-                            child: Text(
-                              'Show full details',
-                              style: bodyText14w600(color: primary),
-                            )),
-                        productDetails: completedOrderList[index],
-                      );
-                    }),
-              ),
-              SizedBox(
-                height: height(context) * 0.8,
-                child: ListView.builder(
-                    itemCount: cancelOrderList.length,
-                    itemBuilder: (context, index) {
-                      return MyOrdersDetails(
-                        status: 'Cancelled',
-                        statusColor: Colors.grey,
+                        status: 'Active',
+                        statusColor: primary,
                         returnWidget: const SizedBox(),
                         showDetailAndTrackButton: InkWell(
                             onTap: () {
@@ -209,20 +164,83 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                                   MaterialPageRoute(
                                       builder: (context) => OrderStatusScreen(
                                             productDetails:
-                                                cancelOrderList[index],
+                                                activeOrderList[index],
                                           )));
                             },
                             child: Text(
                               'Show full details',
                               style: bodyText14w600(color: primary),
                             )),
-                        productDetails: cancelOrderList[index],
+                        productDetails: activeOrderList[index],
                       );
                     }),
-              ),
-            ],
-          ))
-        ],
+                SizedBox(
+                  height: height(context) * 0.8,
+                  child: ListView.builder(
+                      itemCount: completedOrderList.length,
+                      itemBuilder: (context, index) {
+                        return MyOrdersDetails(
+                          status: 'Completed',
+                          statusColor: Colors.green,
+                          returnWidget: Container(
+                            height: 25,
+                            width: width(context) * 0.25,
+                            decoration: myOutlineBoxDecoration(1, primary, 10),
+                            child: Center(
+                                child: Text(
+                              'Return',
+                              style: bodytext12Bold(color: primary),
+                            )),
+                          ),
+                          showDetailAndTrackButton: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => OrderStatusScreen(
+                                              productDetails:
+                                                  completedOrderList[index],
+                                            )));
+                              },
+                              child: Text(
+                                'Show full details',
+                                style: bodyText14w600(color: primary),
+                              )),
+                          productDetails: completedOrderList[index],
+                        );
+                      }),
+                ),
+                SizedBox(
+                  height: height(context) * 0.8,
+                  child: ListView.builder(
+                      itemCount: cancelOrderList.length,
+                      itemBuilder: (context, index) {
+                        return MyOrdersDetails(
+                          status: 'Cancelled',
+                          statusColor: Colors.grey,
+                          returnWidget: const SizedBox(),
+                          showDetailAndTrackButton: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => OrderStatusScreen(
+                                              productDetails:
+                                                  cancelOrderList[index],
+                                            )));
+                              },
+                              child: Text(
+                                'Show full details',
+                                style: bodyText14w600(color: primary),
+                              )),
+                          productDetails: cancelOrderList[index],
+                        );
+                      }),
+                ),
+              ],
+            ))
+          ],
+        ),
       ),
     );
   }

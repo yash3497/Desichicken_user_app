@@ -448,6 +448,8 @@ class OrderPlacedWidget extends StatefulWidget {
 }
 
 String currentAddress = "";
+String oldAddress = "";
+String currentAddressReferenceId = "";
 
 class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   final _razorpay = Razorpay();
@@ -459,8 +461,17 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         .get()
         .then((value) {
       currentAddress = value.docs.first.data()["wholeAddress"];
+      oldAddress = value.docs.first.data()["wholeAddress"];
+      currentAddressReferenceId = value.docs.first.id;
       setState(() {});
     });
+  }
+
+  _updateReferenceAddress() async {
+    await FirebaseFirestore.instance
+        .collection('Addresses')
+        .doc(currentAddressReferenceId)
+        .update({'wholeAddress': currentAddress});
   }
 
   late Timer _timer;
@@ -474,6 +485,9 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     super.initState();
     fetchUserDetails();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (currentAddress != oldAddress) {
+        _updateReferenceAddress();
+      }
       setState(() {});
     });
   }

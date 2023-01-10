@@ -6,6 +6,7 @@ import 'package:delicious_app/views/humburger_items/fill_your_profile_screen.dar
 import 'package:delicious_app/views/start/map_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../utils/constants.dart';
 import '../../widget/BottomNavBar.dart';
@@ -44,6 +45,7 @@ class _OtpVerifyState extends State<OtpVerify> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   void verifyNumber(BuildContext context) {
+    Fluttertoast.showToast(msg: 'Otp Sent');
     String phone = widget.phonenumber;
     auth.verifyPhoneNumber(
         phoneNumber: "+91$phone",
@@ -390,6 +392,11 @@ class _OtpVerifyState extends State<OtpVerify> {
             alignment: Alignment.bottomRight,
             child: TextButton(
                 onPressed: () {
+                  verifyNumber(context);
+                  setState(() {
+                    time = 90;
+                    _start = '1:30';
+                  });
                   // Navigator.push(
                   //     context,
                   //     MaterialPageRoute(

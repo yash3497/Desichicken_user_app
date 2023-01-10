@@ -1,4 +1,5 @@
 import 'package:delicious_app/utils/constants.dart';
+import 'package:delicious_app/views/home/home_screen.dart';
 import 'package:delicious_app/views/humburger_items/fill_your_profile_screen.dart';
 import 'package:delicious_app/widget/custom_gradient_button.dart';
 import 'package:delicious_app/widget/custom_textfield.dart';
@@ -16,8 +17,6 @@ import '../../widget/BottomNavBar.dart';
 import 'choose_location.dart';
 
 class MapScreen extends StatefulWidget {
-  static const CameraPosition initialCameraPosition =
-      CameraPosition(target: LatLng(21.7679, 78.8718), zoom: 14.0);
   const MapScreen({super.key});
 
   @override
@@ -25,17 +24,18 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-
+  late CameraPosition initialCameraPosition;
   @override
   void initState() {
     _handleLocationPermission();
     // TODO: implement initState
     super.initState();
+    initialCameraPosition =
+        CameraPosition(target: LatLng(latitude, longitude), zoom: 14.0);
   }
 
-
   GoogleMapController? mapController;
- Set<Marker> markersList = {};
+  Set<Marker> markersList = {};
   CameraPosition? cameraPosition;
 
   final Mode _mode = Mode.overlay;
@@ -70,14 +70,12 @@ class _MapScreenState extends State<MapScreen> {
     return true;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
           preferredSize: Size.fromHeight(100),
-          child: 
-          Container(
+          child: Container(
             height: height(context) * 0.13,
             // decoration: gradientBoxDecoration(yellowLinerGradient(), 0),
             child: Row(
@@ -96,128 +94,126 @@ class _MapScreenState extends State<MapScreen> {
                 Text(
                   'Search Place',
                   style: TextStyle(
-                      color: primary, fontSize: 20, fontWeight: FontWeight.w600),
+                      color: primary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600),
                 )
               ],
             ),
           )),
       body: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  height: height(context) * 0.6,
-                  width: width(context),
-                  child: GoogleMap(
-                    initialCameraPosition:
-                        MapScreen.initialCameraPosition,
-                    markers: markersList,
-                    mapType: MapType.normal,
-                    onMapCreated: (GoogleMapController controller) {
-                      setState(() {
-                        mapController = controller; 
-                      });
-                    },
-                  ),
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                height: height(context) * 0.6,
+                width: width(context),
+                child: GoogleMap(
+                  initialCameraPosition: initialCameraPosition,
+                  markers: markersList,
+                  mapType: MapType.normal,
+                  onMapCreated: (GoogleMapController controller) {
+                    setState(() {
+                      mapController = controller;
+                    });
+                  },
                 ),
-      
-            InkWell(
-                        onTap: () async {
-                          var place = await PlacesAutocomplete.show(
-                            radius: 10,
-                              context: context,
-                              apiKey: 'AIzaSyAuny-ypKqnRF4BRhNtPECpmZcHn3N8mNA',
-                              mode: Mode.overlay,
-                              types: [],
-                              strictbounds: false,
-                              components: [Component(Component.country, 'in')],
-                              //google_map_webservice package
-                              onError: (err) {
-                                
-                                print(err);
-                              });
-      
-                          if (place != null) {
-                            setState(() {
-                              location = place.description.toString();
-                            });
-      
-                            //form google_maps_webservice package
-                            final plist = GoogleMapsPlaces(
-                              apiKey: "AIzaSyAuny-ypKqnRF4BRhNtPECpmZcHn3N8mNA",
-                              apiHeaders: await const GoogleApiHeaders().getHeaders(),
-                              //from google_api_headers package
-                            );
-                            String placeid = place.placeId ?? "0";
-                            final detail =
-                                await plist.getDetailsByPlaceId(placeid);
-                            final geometry = detail.result.geometry!;
-                            final lat = geometry.location.lat;
-                            final lang = geometry.location.lng;
-                            var newlatlang = LatLng(lat, lang);
-      
-                            markersList.clear();
-                            markersList.add(Marker(
-                                markerId: const MarkerId("0"),
-                                position: LatLng(lat, lang),
-                                infoWindow: InfoWindow(title: location)));
+              ),
 
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChooseDeliveryLocation(
-                                         
-                                          position: CameraPosition(
-                                              target: newlatlang, zoom: 17),
-                                          markersList: markersList,
-                                          location: detail.result.formattedAddress.toString(),
-                                        )));                          
+              InkWell(
+                  onTap: () async {
+                    var place = await PlacesAutocomplete.show(
+                        radius: 10,
+                        context: context,
+                        apiKey: 'AIzaSyAuny-ypKqnRF4BRhNtPECpmZcHn3N8mNA',
+                        mode: Mode.overlay,
+                        types: [],
+                        strictbounds: false,
+                        components: [Component(Component.country, 'in')],
+                        //google_map_webservice package
+                        onError: (err) {
+                          print(err);
+                        });
 
+                    if (place != null) {
+                      setState(() {
+                        location = place.description.toString();
+                      });
 
-                            //move map camera to selected place with animation
-                            // mapController!.animateCamera(
-                            //     CameraUpdate.newCameraPosition(CameraPosition(
-                            //         target: newlatlang, zoom: 17)));
-                          }
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Card(
-                            child: Container(
-                                padding: EdgeInsets.all(0),
-                                width: MediaQuery.of(context).size.width - 40,
-                                child: ListTile(
-                                  title: Text(
-                                    location,
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  trailing: Icon(Icons.search),
-                                  dense: true,
-                                )),
-                          ),
-                        )),
-               
-                // TextField(
-                //   onTap: () {
-                //     Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //             builder: (context) => ChooseDeliveryLocation()));
-                //   },
-                //   decoration: InputDecoration(
-                //       border: OutlineInputBorder(
-                //         borderRadius: BorderRadius.circular(10.0),
-                //       ),
-                //       filled: true,
-                //       hintStyle: TextStyle(color: Colors.grey[800]),
-                //       hintText: "Search",
-                //       fillColor: Colors.white70),
-                // )
-              ],
-            ),
+                      //form google_maps_webservice package
+                      final plist = GoogleMapsPlaces(
+                        apiKey: "AIzaSyAuny-ypKqnRF4BRhNtPECpmZcHn3N8mNA",
+                        apiHeaders: await const GoogleApiHeaders().getHeaders(),
+                        //from google_api_headers package
+                      );
+                      String placeid = place.placeId ?? "0";
+                      final detail = await plist.getDetailsByPlaceId(placeid);
+                      final geometry = detail.result.geometry!;
+                      final lat = geometry.location.lat;
+                      final lang = geometry.location.lng;
+                      var newlatlang = LatLng(lat, lang);
+
+                      markersList.clear();
+                      markersList.add(Marker(
+                          markerId: const MarkerId("0"),
+                          position: LatLng(lat, lang),
+                          infoWindow: InfoWindow(title: location)));
+
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChooseDeliveryLocation(
+                                    position: CameraPosition(
+                                        target: newlatlang, zoom: 17),
+                                    markersList: markersList,
+                                    location: detail.result.formattedAddress
+                                        .toString(),
+                                  )));
+
+                      //move map camera to selected place with animation
+                      // mapController!.animateCamera(
+                      //     CameraUpdate.newCameraPosition(CameraPosition(
+                      //         target: newlatlang, zoom: 17)));
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(15),
+                    child: Card(
+                      child: Container(
+                          padding: EdgeInsets.all(0),
+                          width: MediaQuery.of(context).size.width - 40,
+                          child: ListTile(
+                            title: Text(
+                              location,
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            trailing: Icon(Icons.search),
+                            dense: true,
+                          )),
+                    ),
+                  )),
+
+              // TextField(
+              //   onTap: () {
+              //     Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //             builder: (context) => ChooseDeliveryLocation()));
+              //   },
+              //   decoration: InputDecoration(
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(10.0),
+              //       ),
+              //       filled: true,
+              //       hintStyle: TextStyle(color: Colors.grey[800]),
+              //       hintText: "Search",
+              //       fillColor: Colors.white70),
+              // )
+            ],
           ),
         ),
+      ),
       // Container(
       //   width: width(context),
       //   decoration: const BoxDecoration(

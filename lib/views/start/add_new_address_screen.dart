@@ -95,10 +95,11 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
       Placemark place = placemarks[0];
       setState(() {
         addressController.text = place.name.toString();
-        cityController.text = place.subAdministrativeArea.toString();
+        streeController.text = place.street.toString();
+        localityController.text = place.locality.toString();
         pincodeController.text = place.postalCode.toString();
         StateController.text = place.administrativeArea.toString();
-        landmarkController.text = place.locality.toString();
+        cityController.text = place.subAdministrativeArea.toString();
         // _currentAddress =
         //     '${place.name}, ${place.locality}, ${place.subAdministrativeArea}, ${place.postalCode}';
         //     print(_currentAddress);
