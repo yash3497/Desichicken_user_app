@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
+import 'categories/vendor_product_screen.dart';
+
 class ProductScreen extends StatefulWidget {
   final String id;
   final String name;
@@ -28,6 +30,28 @@ class _ProductScreenState extends State<ProductScreen> {
   int reviews3 = 50;
   int reviews4 = 30;
   int reviews5 = 10;
+  List subCats = [];
+  getSubCats() async {
+    var a = await FirebaseFirestore.instance
+        .collection("Products")
+        .doc(widget.id)
+        .get();
+    String catId = a['categoryId'];
+    var b = await FirebaseFirestore.instance
+        .collection("SubCategories")
+        .where("categoryId", isEqualTo: catId)
+        .get();
+    subCats = b.docs;
+    print(subCats);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getSubCats();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,218 +94,265 @@ class _ProductScreenState extends State<ProductScreen> {
             final data = snapshot.data;
 
             return snapshot.hasData
-                ? Column(
-                    children: [
-                      Container(
-                        height: height(context) * 0.42,
-                        width: width(context) * 1,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: NetworkImage(data!.docs[0]['image']))),
-                        child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: SafeArea(
+                ? SafeArea(
+                    child: Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          height: 40,
+                          width: MediaQuery.of(context).size.width,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: subCats.length,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: (){
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => VendorProductScreen(
+                                              category: subCats[index]['name'],
+                                              vendorID: '',
+                                              vendorName: '',
+                                              subCategoryId: subCats[index]['subCategoryId'],
+                                            )));
+                                  },
+                                  child: Card(
+
+                                    elevation: 5,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 30,
+                                          height: 35,
+                                          child: Image.network(
+                                            subCats[index]['name'],
+                                          ),
+                                        ),
+                                        Text(subCats[index]['name']),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                        ),
+                        Container(
+                          height: height(context) * 0.42,
+                          width: width(context) * 1,
+                          decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  image: NetworkImage(data!.docs[0]['image']))),
+                          child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: SafeArea(
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.arrow_back,
+                                          size: 30,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              width: width(context),
+                              height: height(context) * 0.48,
+                              decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 5,
+                                      color: Colors.grey,
+                                    )
+                                  ],
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(30),
+                                      topRight: Radius.circular(30))),
+                              padding: const EdgeInsets.only(
+                                  left: 15, top: 20, right: 15, bottom: 10),
                               child: Column(
                                 children: [
                                   Row(
-                                    children: const [
-                                      Icon(
-                                        Icons.arrow_back,
-                                        size: 30,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )),
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                            width: width(context),
-                            height: height(context) * 0.48,
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 5,
-                                    color: Colors.grey,
-                                  )
-                                ],
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30),
-                                    topRight: Radius.circular(30))),
-                            padding: const EdgeInsets.only(
-                                left: 15, top: 20, right: 15, bottom: 10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      height: 25,
-                                      width: width(context) * 0.22,
-                                      decoration: myFillBoxDecoration(
-                                          0, ligthRed.withOpacity(0.4), 20),
-                                      child: Center(
-                                        child: Text(
-                                          'Popular',
-                                          style: bodytext12Bold(color: primary),
+                                    children: [
+                                      Container(
+                                        height: 25,
+                                        width: width(context) * 0.22,
+                                        decoration: myFillBoxDecoration(
+                                            0, ligthRed.withOpacity(0.4), 20),
+                                        child: Center(
+                                          child: Text(
+                                            'Popular',
+                                            style:
+                                                bodytext12Bold(color: primary),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    addHorizontalySpace(width(context) * 0.11),
-                                    Text(
-                                      widget.name,
-                                      style: bodyText16w600(color: black),
-                                    )
-                                  ],
-                                ),
-                                addVerticalSpace(20),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      height: height(context) * 0.13,
-                                      width: width(context) * 0.26,
-                                      decoration: shadowDecoration(10, 5),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Image.asset(
-                                              'assets/images/original 3.png'),
-                                          Text(
-                                            '${data.docs[0]['pieces']} Pieces',
-                                            style: bodytext12Bold(color: black),
-                                          )
-                                        ],
+                                      addHorizontalySpace(
+                                          width(context) * 0.11),
+                                      Text(
+                                        widget.name,
+                                        style: bodyText16w600(color: black),
+                                      )
+                                    ],
+                                  ),
+                                  addVerticalSpace(20),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        height: height(context) * 0.13,
+                                        width: width(context) * 0.26,
+                                        decoration: shadowDecoration(10, 5),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Image.asset(
+                                                'assets/images/original 3.png'),
+                                            Text(
+                                              '${data.docs[0]['pieces']} Pieces',
+                                              style:
+                                                  bodytext12Bold(color: black),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Container(
-                                      height: height(context) * 0.12,
-                                      width: width(context) * 0.26,
-                                      decoration: shadowDecoration(10, 5),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Image.asset(
-                                              'assets/images/original 2.png'),
-                                          Text(
-                                            '${data.docs[0]['serves']} Serves',
-                                            style: bodytext12Bold(color: black),
-                                          )
-                                        ],
+                                      Container(
+                                        height: height(context) * 0.12,
+                                        width: width(context) * 0.26,
+                                        decoration: shadowDecoration(10, 5),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Image.asset(
+                                                'assets/images/original 2.png'),
+                                            Text(
+                                              '${data.docs[0]['serves']} Serves',
+                                              style:
+                                                  bodytext12Bold(color: black),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Container(
-                                      height: height(context) * 0.12,
-                                      width: width(context) * 0.26,
-                                      decoration: shadowDecoration(10, 5),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Image.asset(
-                                              'assets/images/original 1.png'),
-                                          Text(
-                                            '${data.docs[0]['weight']} gms ',
-                                            textAlign: TextAlign.center,
-                                            style: bodytext12Bold(color: black),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                addVerticalSpace(15),
-                                // Text(
-                                //   data.docs[0]['discription'],
-                                //   style: bodyText12Small(color: black),
-                                // ),
-                                // addVerticalSpace(15),
-                                // Row(
-                                //   mainAxisAlignment:
-                                //       MainAxisAlignment.spaceBetween,
-                                //   children: [
-                                //     Text(
-                                //       'Customer Reviews',
-                                //       style: bodyText16w600(color: black),
-                                //     ),
-                                //     SizedBox(
-                                //       child: Row(
-                                //         children: [
-                                //           const Icon(
-                                //             Icons.star_half_rounded,
-                                //             color: Colors.green,
-                                //           ),
-                                //           Text(
-                                //             '4.8/5',
-                                //             style: bodyText16w600(color: black),
-                                //           ),
-                                //         ],
-                                //       ),
-                                //     )
-                                //   ],
-                                // ),
-                                // customerReviews(context),
-                                // addVerticalSpace(10),
-                                // SizedBox(
-                                //   height: height(context) * 0.43,
-                                //   child: ListView.builder(
-                                //       itemCount: 10,
-                                //       padding: EdgeInsets.zero,
-                                //       itemBuilder: (context, index) {
-                                //         return ListTile(
-                                //           leading: const CircleAvatar(
-                                //             backgroundImage: AssetImage(
-                                //                 'assets/images/review1.png'),
-                                //           ),
-                                //           title: Text(
-                                //             'Joan Perkins',
-                                //             style: bodyText14w600(color: black),
-                                //           ),
-                                //           subtitle: Row(
-                                //             children: [
-                                //               RatingBar.builder(
-                                //                 initialRating: 4.5,
-                                //                 minRating: 1,
-                                //                 itemSize: 20,
-                                //                 direction: Axis.horizontal,
-                                //                 allowHalfRating: true,
-                                //                 itemCount: 5,
-                                //                 unratedColor:
-                                //                     Colors.teal.shade100,
-                                //                 itemBuilder: (context, _) =>
-                                //                     const Icon(
-                                //                   Icons.star_rate_rounded,
-                                //                   color: Colors.teal,
-                                //                 ),
-                                //                 onRatingUpdate: (rating) {},
-                                //               ),
-                                //               Text('4.5')
-                                //             ],
-                                //           ),
-                                //           trailing: Text(
-                                //             '1 day ago',
-                                //             style: bodyText13normal(
-                                //                 color: black.withOpacity(0.6)),
-                                //           ),
-                                //         );
-                                //       }),
-                                // ),
-                              ],
+                                      Container(
+                                        height: height(context) * 0.12,
+                                        width: width(context) * 0.26,
+                                        decoration: shadowDecoration(10, 5),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Image.asset(
+                                                'assets/images/original 1.png'),
+                                            Text(
+                                              '${data.docs[0]['weight']} gms ',
+                                              textAlign: TextAlign.center,
+                                              style:
+                                                  bodytext12Bold(color: black),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  addVerticalSpace(15),
+                                  // Text(
+                                  //   data.docs[0]['discription'],
+                                  //   style: bodyText12Small(color: black),
+                                  // ),
+                                  // addVerticalSpace(15),
+                                  // Row(
+                                  //   mainAxisAlignment:
+                                  //       MainAxisAlignment.spaceBetween,
+                                  //   children: [
+                                  //     Text(
+                                  //       'Customer Reviews',
+                                  //       style: bodyText16w600(color: black),
+                                  //     ),
+                                  //     SizedBox(
+                                  //       child: Row(
+                                  //         children: [
+                                  //           const Icon(
+                                  //             Icons.star_half_rounded,
+                                  //             color: Colors.green,
+                                  //           ),
+                                  //           Text(
+                                  //             '4.8/5',
+                                  //             style: bodyText16w600(color: black),
+                                  //           ),
+                                  //         ],
+                                  //       ),
+                                  //     )
+                                  //   ],
+                                  // ),
+                                  // customerReviews(context),
+                                  // addVerticalSpace(10),
+                                  // SizedBox(
+                                  //   height: height(context) * 0.43,
+                                  //   child: ListView.builder(
+                                  //       itemCount: 10,
+                                  //       padding: EdgeInsets.zero,
+                                  //       itemBuilder: (context, index) {
+                                  //         return ListTile(
+                                  //           leading: const CircleAvatar(
+                                  //             backgroundImage: AssetImage(
+                                  //                 'assets/images/review1.png'),
+                                  //           ),
+                                  //           title: Text(
+                                  //             'Joan Perkins',
+                                  //             style: bodyText14w600(color: black),
+                                  //           ),
+                                  //           subtitle: Row(
+                                  //             children: [
+                                  //               RatingBar.builder(
+                                  //                 initialRating: 4.5,
+                                  //                 minRating: 1,
+                                  //                 itemSize: 20,
+                                  //                 direction: Axis.horizontal,
+                                  //                 allowHalfRating: true,
+                                  //                 itemCount: 5,
+                                  //                 unratedColor:
+                                  //                     Colors.teal.shade100,
+                                  //                 itemBuilder: (context, _) =>
+                                  //                     const Icon(
+                                  //                   Icons.star_rate_rounded,
+                                  //                   color: Colors.teal,
+                                  //                 ),
+                                  //                 onRatingUpdate: (rating) {},
+                                  //               ),
+                                  //               Text('4.5')
+                                  //             ],
+                                  //           ),
+                                  //           trailing: Text(
+                                  //             '1 day ago',
+                                  //             style: bodyText13normal(
+                                  //                 color: black.withOpacity(0.6)),
+                                  //           ),
+                                  //         );
+                                  //       }),
+                                  // ),
+                                ],
+                              ),
                             ),
-                          ),
-                          ProductPriceWidget(
-                            price: double.parse(data.docs[0]['price'].toString()),
-                          )
-                        ],
-                      ),
-                    ],
+                            ProductPriceWidget(
+                              price: double.parse(
+                                  data.docs[0]['price'].toString()),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   )
                 : SizedBox();
           }),

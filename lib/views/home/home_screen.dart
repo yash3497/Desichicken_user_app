@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../widget/add_to_cart.dart';
 import '../../widget/custom_gradient_button.dart';
 import '../../widget/slider_widget.dart';
+import '../categories/vendor_product_screen.dart';
 import '../my_cart/cart_tab_screen.dart';
 import '../product_screen.dart';
 
@@ -752,6 +753,7 @@ class _HomeProductListWidgetState extends State<HomeProductListWidget> {
                                 imageURL: data[index]['image'],
                                 weight: data[index]['weight'],
                                 netWeight: data[index]['netWeight'],
+                                catId: data[index]['catId'] ,
                               ),
                             ),
                           )
@@ -936,7 +938,7 @@ class _CategoryTileState extends State<CategoryTile> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    SubCategoryScreen(categoryId: widget.categoryId)));
+                    VendorProductScreen(category: widget.categoryId,vendorID: "",vendorName: "", subCategoryId: '',)));
         // for going to vendor screen
         /*     Navigator.push(
             context,

@@ -27,6 +27,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
       setState(() {
         value.docs.map((e) => data.add(e.data())).toList();
         print('SubCategory $data');
+        
       });
     });
   }
@@ -100,6 +101,8 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
       body: Column(
         children: [
           data.isNotEmpty
+
+
               ? GridView.builder(
                   shrinkWrap: true,
                   itemCount: data.length,
