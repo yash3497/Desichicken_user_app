@@ -43,11 +43,16 @@ class _MyCartScreenState extends State<MyCartScreen> {
       value.docs.forEach((element) {
         // print(element['name']);
         cartamount += double.parse((element['total'].toString()));
+        print("-----------------");
         print(cartamount);
-        setState(() {});
+
         // print(element['total']);
       });
+      setState(() {});
     });
+    // if (mounted) {
+    //   setState(() {});
+    // }
   }
 
   @override
@@ -103,282 +108,293 @@ class _MyCartScreenState extends State<MyCartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Cart",
-          style: bodyText16w600(color: Colors.black),
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const BottomNavBar()),
+            (route) => false);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Cart",
+            style: bodyText16w600(color: Colors.black),
+          ),
+          shadowColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Colors.white,
         ),
-        shadowColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Your Order',
-                    style: bodyText16w600(color: black),
-                  ),
-                  addVerticalSpace(15),
-                  StreamBuilder<QuerySnapshot>(
-                      stream: cartProducts,
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text("Something wrong occurred");
-                        }
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text("Loading");
-                        }
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your Order',
+                      style: bodyText16w600(color: black),
+                    ),
+                    addVerticalSpace(15),
+                    StreamBuilder<QuerySnapshot>(
+                        stream: cartProducts,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text("Something wrong occurred");
+                          }
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text("Loading");
+                          }
 
-                        var cartData = snapshot.requireData;
+                          var cartData = snapshot.requireData;
 
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: cartData.size,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 1, childAspectRatio: 4),
-                          itemBuilder: (BuildContext context, int index) {
-                            return CartTile(
-                              price: cartData.docs[index]['price'],
-                              imageURL: cartData.docs[index]['image'],
-                              name: cartData.docs[index]['name'],
-                              desc: cartData.docs[index]['desc'],
-                              id: cartData.docs[index]['productID'],
-                              stock: cartData.docs[index]['stock'],
-                              insideProduct: false,
-                              weight: cartData.docs[index]['weight'],
-                              netWeight: cartData.docs[index]['netWeight'],
-                              cartList: cartData.docs,
-                              catId: cartData.docs[index]['catId'],
-                            );
-                          },
-                        );
-                      }),
-                  /*   child: ListView.builder(
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: shadowDecoration(15, 0),
-                                  height: height(context) * 0.08,
-                                  width: width(context) * 0.2,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.asset(
-                                      'assets/images/chicken1.png',
-                                      fit: BoxFit.fill,
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: cartData.size,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 1, childAspectRatio: 4),
+                            itemBuilder: (BuildContext context, int index) {
+                              return CartTile(
+                                price: cartData.docs[index]['price'],
+                                imageURL: cartData.docs[index]['image'],
+                                name: cartData.docs[index]['name'],
+                                desc: cartData.docs[index]['desc'],
+                                id: cartData.docs[index]['productID'],
+                                stock: cartData.docs[index]['stock'],
+                                insideProduct: false,
+                                weight: cartData.docs[index]['weight'],
+                                netWeight: cartData.docs[index]['netWeight'],
+                                cartList: cartData.docs,
+                                catId: cartData.docs[index]['catId'],
+                                vendorPrice: cartData.docs[index]
+                                    ['vendorPrice'],
+                              );
+                            },
+                          );
+                        }),
+                    /*   child: ListView.builder(
+                        itemCount: 2,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: shadowDecoration(15, 0),
+                                    height: height(context) * 0.08,
+                                    width: width(context) * 0.2,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Image.asset(
+                                        'assets/images/chicken1.png',
+                                        fit: BoxFit.fill,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                addHorizontalySpace(10),
-                                SizedBox(
-                                  height: height(context) * 0.08,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Polutry Chicken',
-                                        style: bodyText14w600(color: black),
-                                      ),
-                                      Text(
-                                        '900gms I Net: 450gms',
-                                        style: bodyText11Small(
-                                            color: black.withOpacity(0.5)),
-                                      ),
-                                      addVerticalSpace(5),
-                                      Row(
-                                        children: [
-                                          const Text(
-                                            'Rs.250',
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                decoration: TextDecoration
-                                                    .lineThrough,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black26),
-                                          ),
-                                          addHorizontalySpace(5),
-                                          Text(
-                                            'Rs.200',
-                                            style: bodyText14w600(
-                                                color: primary),
-                                          )
-                                        ],
-                                      )
-                                    ],
+                                  addHorizontalySpace(10),
+                                  SizedBox(
+                                    height: height(context) * 0.08,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Polutry Chicken',
+                                          style: bodyText14w600(color: black),
+                                        ),
+                                        Text(
+                                          '900gms I Net: 450gms',
+                                          style: bodyText11Small(
+                                              color: black.withOpacity(0.5)),
+                                        ),
+                                        addVerticalSpace(5),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Rs.250',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black26),
+                                            ),
+                                            addHorizontalySpace(5),
+                                            Text(
+                                              'Rs.200',
+                                              style: bodyText14w600(
+                                                  color: primary),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                addHorizontalySpace(40),
-                                SizedBox(
-                                  width: width(context) * 0.23,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            if (qty > 1) {
-                                              qty--;
-                                            } else if (qty <= 1) {}
-                                          });
-                                        },
-                                        child: Container(
-                                          height: 25,
-                                          width: 25,
-                                          decoration: shadowDecoration(3, 1),
-                                          child: Icon(f
-                                            Icons.remove,
-                                            color: primary,
+                                  addHorizontalySpace(40),
+                                  SizedBox(
+                                    width: width(context) * 0.23,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              if (qty > 1) {
+                                                qty--;
+                                              } else if (qty <= 1) {}
+                                            });
+                                          },
+                                          child: Container(
+                                            height: 25,
+                                            width: 25,
+                                            decoration: shadowDecoration(3, 1),
+                                            child: Icon(f
+                                              Icons.remove,
+                                              color: primary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Text(
-                                        qty.toString(),
-                                        style: bodyText20w700(color: black),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            qty++;
-                                          });
-                                        },
-                                        child: Container(
-                                          height: 25,
-                                          width: 25,
-                                          decoration: shadowDecoration(3, 1),
-                                          child: Icon(
-                                            Icons.add,
-                                            color: primary,
+                                        Text(
+                                          qty.toString(),
+                                          style: bodyText20w700(color: black),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              qty++;
+                                            });
+                                          },
+                                          child: Container(
+                                            height: 25,
+                                            width: 25,
+                                            decoration: shadowDecoration(3, 1),
+                                            child: Icon(
+                                              Icons.add,
+                                              color: primary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              const Divider(
+                                thickness: 1,
+                                height: 30,
+                              )
+                            ],
+                          );
+                        }),*/
+
+                    GestureDetector(
+                        onTap: _getCartTotal,
+                        child: const Text("If total not updated click here")),
+                    addVerticalSpace(15),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (ctx) => BottomNavBar()));
+                        },
+                        child: Text(
+                          '+ Add more items',
+                          style: bodyText14w600(color: primary),
+                        )),
+                    addVerticalSpace(10),
+                    Container(
+                      padding: EdgeInsets.zero,
+                      height: height(context) * 0.06,
+                      width: width(context) * 0.93,
+                      decoration: myOutlineBoxDecoration(0, black, 8),
+                      child: ListTile(
+                        leading: Image.asset('assets/images/promocode.png'),
+                        title: Text(
+                          'Apply Promo Code',
+                          style: bodyText14w600(color: black),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          color: black,
+                        ),
+                        onTap: () async {
+                          await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CouponScreen())).then((value) {
+                            discount = double.parse(value.toString());
+                            if (mounted) {
+                              setState(() {});
+                            }
+                            log(discount.toString());
+                          });
+                        },
+                      ),
+                    ),
+                    addVerticalSpace(10),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12.0, left: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: height(context) * 0.15,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  'Item Total',
+                                  style: bodyText14w600(color: black),
+                                ),
+                                Text(
+                                  'Delivery',
+                                  style: bodyText14w600(color: black),
+                                ),
+                                Text(
+                                  'Total',
+                                  style: bodyText16w600(color: black),
                                 )
                               ],
                             ),
-                            const Divider(
-                              thickness: 1,
-                              height: 30,
-                            )
-                          ],
-                        );
-                      }),*/
-
-                  GestureDetector(
-                      onTap: _getCartTotal,
-                      child: const Text("If total not updated click here")),
-                  addVerticalSpace(15),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (ctx) => BottomNavBar()));
-                      },
-                      child: Text(
-                        '+ Add more items',
-                        style: bodyText14w600(color: primary),
-                      )),
-                  addVerticalSpace(10),
-                  Container(
-                    padding: EdgeInsets.zero,
-                    height: height(context) * 0.06,
-                    width: width(context) * 0.93,
-                    decoration: myOutlineBoxDecoration(0, black, 8),
-                    child: ListTile(
-                      leading: Image.asset('assets/images/promocode.png'),
-                      title: Text(
-                        'Apply Promo Code',
-                        style: bodyText14w600(color: black),
-                      ),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios,
-                        color: black,
-                      ),
-                      onTap: () async {
-                        await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const CouponScreen()))
-                            .then((value) {
-                          discount = double.parse(value.toString());
-                          if (mounted) {
-                            setState(() {});
-                          }
-                          log(discount.toString());
-                        });
-                      },
-                    ),
-                  ),
-                  addVerticalSpace(10),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0, left: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          height: height(context) * 0.15,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text(
-                                'Item Total',
-                                style: bodyText14w600(color: black),
-                              ),
-                              Text(
-                                'Delivery',
-                                style: bodyText14w600(color: black),
-                              ),
-                              Text(
-                                'Total',
-                                style: bodyText16w600(color: black),
-                              )
-                            ],
                           ),
-                        ),
-                        PriceBox(cartamount: cartamount)
-                      ],
+                          PriceBox(cartamount: cartamount)
+                        ],
+                      ),
                     ),
-                  ),
-                  const Divider(
-                    thickness: 5,
-                  ),
-                  addVerticalSpace(10),
-                  Text(
-                    'Delivery',
-                    style: bodyText16w600(color: black),
-                  ),
-                  addVerticalSpace(8),
-                  const DeliveryScheduleBoxWidget(),
-                ],
+                    const Divider(
+                      thickness: 5,
+                    ),
+                    addVerticalSpace(10),
+                    Text(
+                      'Delivery',
+                      style: bodyText16w600(color: black),
+                    ),
+                    addVerticalSpace(8),
+                    const DeliveryScheduleBoxWidget(),
+                  ],
+                ),
               ),
-            ),
-            OrderPlacedWidget(
-              cartamount: cartamount,
-              deliveryFee: deliveryFee,
-            )
-          ],
+              OrderPlacedWidget(
+                cartamount: cartamount,
+                deliveryFee: deliveryFee,
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -463,6 +479,12 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         .then((value) {
       currentAddress = value.docs.first.data()["wholeAddress"];
       oldAddress = value.docs.first.data()["wholeAddress"];
+      setState(() {
+        latitude = double.parse(value.docs.first.data()["lat"].toString());
+        longitude = double.parse(value.docs.first.data()["lng"].toString());
+        print("------------------");
+        print(latitude);
+      });
       currentAddressReferenceId = value.docs.first.id;
       setState(() {});
     });
@@ -522,20 +544,20 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     var orderId = "${DateTime.now().microsecondsSinceEpoch}";
     sendNotification(orderId, "New Order Successful", token);
     Map aa = {};
-    for(var i in cartList){
+    for (var i in cartList) {
       String vId = i['vendorId'];
-      if(aa[vId]!=null){
+      if (aa[vId] != null) {
         List temp = aa[vId];
         temp.add(i);
-        aa[vId] =  temp;
-      }else{
+        aa[vId] = temp;
+      } else {
         List temp = [];
         temp.add(i);
-        aa[vId] =  temp;
+        aa[vId] = temp;
       }
     }
     print(aa);
-    for(var j in aa.keys){
+    for (var j in aa.keys) {
       FirebaseFirestore.instance.collection("Orders").doc().set({
         "pickupAddress": "",
         "deliveryAddress": currentAddress,
@@ -553,12 +575,12 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         "orderProcess": false,
         "orderAccept": false,
         "orderShipped": false,
-        "deliveryFees": 50.0,
+        "deliveryFees": widget.cartamount < 500 ? widget.deliveryFee : 0,
         "isPaid": true,
         "orderDenied": false,
         "totalAmount": ((widget.cartamount) -
             ((widget.cartamount) * (discount / 100)) +
-            40),
+            (widget.cartamount < 500 ? widget.deliveryFee : 0)),
         "createdAt": Timestamp.now(),
         "items": aa[j],
         "discount": (widget.cartamount) * (discount / 100),
@@ -577,7 +599,9 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     for (var doc in vendorTokenList) {
       sendNotification(
           // "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
-          "New Order Received", "\n Desichikken" , doc.trim());
+          "New Order Received",
+          "\n Desichikken",
+          doc.trim());
     }
     // FirebaseFirestore.instance.collection("Orders").doc(orderId).set({
     //   "pickupAddress": "",
@@ -616,41 +640,38 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     //   "vendorNumber": vendorNumber,
     //   "rating": "",
     // }).then((value) {
-      FirebaseFirestore.instance
-          .collection('Cart')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection("products")
-          .get()
-          .then((value) {
-        final batch = FirebaseFirestore.instance.batch();
+    FirebaseFirestore.instance
+        .collection('Cart')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("products")
+        .get()
+        .then((value) {
+      final batch = FirebaseFirestore.instance.batch();
 
-        for (var doc in value.docs) {
-          batch.delete(doc.reference);
-        }
-        batch.commit();
-      });
-      FirebaseFirestore.instance.collection("Payments").doc(orderId).set({
-        "orderId": orderId,
-        "paymentId": response.paymentId!,
-        "time": Timestamp.now(),
-        "name": userDetails["Name"] ?? "",
-        "amount": ((widget.cartamount) -
-            ((widget.cartamount) * (discount / 100)) +
-            40),
-        "vendorId": "",
-        "uid": FirebaseAuth.instance.currentUser?.uid,
-      }).then((value) {
-        Fluttertoast.showToast(msg: "Order Successfully");
+      for (var doc in value.docs) {
+        batch.delete(doc.reference);
+      }
+      batch.commit();
+    });
+    FirebaseFirestore.instance.collection("Payments").doc(orderId).set({
+      "orderId": orderId,
+      "paymentId": response.paymentId!,
+      "time": Timestamp.now(),
+      "name": userDetails["Name"] ?? "",
+      "amount":
+          ((widget.cartamount) - ((widget.cartamount) * (discount / 100)) + 40),
+      "vendorId": "",
+      "uid": FirebaseAuth.instance.currentUser?.uid,
+    }).then((value) {
+      Fluttertoast.showToast(msg: "Order Successfully");
 
-        // sendNotification(
-        //     "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
-      });
+      // sendNotification(
+      //     "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
+    });
 
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
     // });
-
-
   }
 
   List<String> vendorTokenList = [];
@@ -664,12 +685,9 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         if (doc.data().keys.contains("latitude") &&
             doc.data().keys.contains("longitude") &&
             doc.data().keys.contains("token")) {
-          print(doc.data());
-          log("distance : ${calculateDistance(latitude, longitude, doc["latitude"], doc["longitude"])}");
           if ((calculateDistance(
                   latitude, longitude, doc["latitude"], doc["longitude"])) <=
               5) {
-            log("tokenVendor ${doc.data()["token"]}");
             vendorTokenList.add(doc.data()["token"]);
           }
         }
@@ -764,8 +782,8 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
                       .then((value) {
                     setState(() {
                       currentAddress = value["wholeAddress"];
-                      latitude = value["lat"];
-                      latitude = value["lng"];
+                      latitude = double.parse(value["lat"]);
+                      longitude = double.parse(value["lng"]);
                     });
                     log(currentAddress);
                   });
@@ -797,6 +815,8 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
               ),
               InkWell(
                 onTap: () {
+                  print('--------------');
+                  print('latitute $latitude');
                   if (currentAddress == "") {
                     Fluttertoast.showToast(msg: "Please choose address");
                   } else if (deliveryOption == "Schedule" && Stime == null) {
@@ -807,7 +827,6 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
                   } else {
                     fetchIsVendorAvailable().then((value) {
                       if (vendorTokenList.isNotEmpty) {
-                        log("Token${vendorTokenList.toString()}");
                         _razorpay.open(options);
                       } else {
                         Fluttertoast.showToast(
@@ -830,7 +849,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
                         children: [
                           cartList.isNotEmpty
                               ? Text(
-                                  'Rs. ${(widget.cartamount) - ((widget.cartamount) * (discount / 100)) + widget.deliveryFee}',
+                                  'Rs. ${(widget.cartamount) - ((widget.cartamount) * (discount / 100)) + (widget.cartamount < 500 ? widget.deliveryFee : 0)}',
                                   style: bodytext12Bold(color: white))
                               : Text(
                                   'Rs. ${(widget.cartamount) - ((widget.cartamount) * (discount / 100))}',
@@ -949,6 +968,7 @@ class _DeliveryScheduleBoxWidgetState extends State<DeliveryScheduleBoxWidget> {
 
 class CartTile extends StatefulWidget {
   final num price;
+  final num vendorPrice;
   final String imageURL;
   final String name;
   final String desc;
@@ -963,6 +983,7 @@ class CartTile extends StatefulWidget {
   const CartTile(
       {super.key,
       required this.price,
+      required this.vendorPrice,
       required this.imageURL,
       required this.name,
       required this.desc,
@@ -972,8 +993,7 @@ class CartTile extends StatefulWidget {
       required this.weight,
       required this.netWeight,
       required this.cartList,
-      required this.catId
-      });
+      required this.catId});
 
   @override
   State<CartTile> createState() => _CartTileState();
@@ -1044,6 +1064,7 @@ class _CartTileState extends State<CartTile> {
                     weight: widget.weight,
                     netWeight: widget.netWeight,
                     catId: widget.catId,
+                    vendorPrice: widget.vendorPrice,
                   ),
                 ),
               ),

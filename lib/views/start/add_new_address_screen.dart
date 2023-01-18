@@ -337,6 +337,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   width: width(context) * 0.4,
@@ -351,13 +352,43 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                 ),
                 SizedBox(
                   width: width(context) * 0.4,
-                  child: CustomTextFeild(
-                    hinttext: widget.existing
-                        ? widget.existingDetials[3] == ""
-                            ? 'State'
-                            : widget.existingDetials[3]
-                        : 'State',
-                    controller: StateController,
+                  child: Column(
+                    children: [
+                      CustomTextFeild(
+                        hinttext: widget.existing
+                            ? widget.existingDetials[3] == ""
+                                ? 'State'
+                                : widget.existingDetials[3]
+                            : 'State',
+                        controller: StateController,
+                        onChanged: (p0) {
+                          setState(() {});
+                        },
+                      ),
+                      ListView.builder(
+                        itemCount: stateList.length,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          var suggestion = stateList[index];
+                          if (suggestion.toLowerCase().startsWith(
+                                  StateController.text.toLowerCase()) &&
+                              StateController.text != "") {
+                            return SizedBox(
+                              height: 40,
+                              child: ListTile(
+                                title: Text(suggestion),
+                                onTap: () {
+                                  StateController.text = suggestion;
+                                  setState(() {});
+                                },
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 )
               ],
@@ -387,16 +418,47 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
             const SizedBox(
               height: 20,
             ),
-            CustomTextFeild(
-              hinttext: widget.existing
-                  ? widget.existingDetials[6] == ""
-                      ? 'City'
-                      : widget.existingDetials[6]
-                  : 'City',
-              controller: cityController,
+            Column(
+              children: [
+                CustomTextFeild(
+                  hinttext: widget.existing
+                      ? widget.existingDetials[6] == ""
+                          ? 'City'
+                          : widget.existingDetials[6]
+                      : 'City',
+                  controller: cityController,
+                  onChanged: (p0) {
+                    setState(() {});
+                  },
+                ),
+                ListView.builder(
+                  itemCount: city[StateController.text]?.length ?? 0,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    var suggestion = city[StateController.text]?[index];
+                    if (suggestion!
+                            .toLowerCase()
+                            .startsWith(cityController.text.toLowerCase()) &&
+                        cityController.text != "") {
+                      return SizedBox(
+                        height: 40,
+                        child: ListTile(
+                          title: Text(suggestion),
+                          onTap: () {
+                            cityController.text = suggestion;
+                            setState(() {});
+                          },
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ],
             ),
             const SizedBox(
-              height: 40,
+              height: 20,
             ),
             CustomButton(
                 buttonName: 'Save',
@@ -488,9 +550,11 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
 }
 
 class CustomTextFeild extends StatelessWidget {
-  const CustomTextFeild({required this.hinttext, this.controller});
+  const CustomTextFeild(
+      {required this.hinttext, this.controller, this.onChanged});
   final String hinttext;
   final TextEditingController? controller;
+  final Function(String)? onChanged;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -498,6 +562,7 @@ class CustomTextFeild extends StatelessWidget {
       width: width(context) * 0.9,
       child: TextField(
         controller: controller,
+        onChanged: onChanged,
         decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),

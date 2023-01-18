@@ -147,7 +147,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 assetUrl: 'assets/images/door.png',
               ),
               PageViewItemWidget(
-                text: "Delicious is where Your Favourite Food Lives",
+                text: "Desichikken is where Your Favourite Food Lives",
                 text2: "Here you can find a dish for every taste. Enjoy!",
                 assetUrl: 'assets/images/scroll2.png',
               ),
@@ -184,9 +184,9 @@ class _LogInScreenState extends State<LogInScreen> {
                 margin: const EdgeInsets.only(top: 50),
                 height: height(context),
                 width: width(context),
-                decoration: BoxDecoration(
-                    color: white,
-                    boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.grey)]),
+                decoration: BoxDecoration(color: white, boxShadow: const [
+                  BoxShadow(blurRadius: 6, color: Colors.grey)
+                ]),
                 child: Column(
                   children: [
                     addVerticalSpace(25),
@@ -209,22 +209,20 @@ class _LogInScreenState extends State<LogInScreen> {
                     CustomButton(
                       buttonName: 'Send OTP',
                       onClick: () async {
-                        
-        /*                var response= await FirebaseFirestore.instance.collection("users")
+                        /*                var response= await FirebaseFirestore.instance.collection("users")
                         .where("Number",isEqualTo: "+91${phonecontroller.text}").get();
                         
                         if(response.docs.isNotEmpty){
 */
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => OtpVerify(
-                                    phonenumber: phonecontroller.text,
-                                  )));
-                    /*    }else{
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OtpVerify(
+                                      phonenumber: phonecontroller.text,
+                                    )));
+                        /*    }else{
                           Fluttertoast.showToast(msg: "You are not registered");
                         }*/
-
                       },
                     ),
                     addVerticalSpace(height(context) * 0.06),

@@ -455,7 +455,7 @@ class _MyOrdersDetailsState extends State<MyOrdersDetails> {
                                     style: bodyText14w600(color: black),
                                   ),
                                   Text(
-                                    'Rs.${widget.productDetails["totalAmount"] - widget.productDetails["deliveryFees"]}',
+                                    'Rs.${(widget.productDetails["items"] as List).map((e) => e["price"]).reduce((value, element) => value + element)}',
                                     style: bodyText14w600(color: black),
                                   )
                                 ],
@@ -489,7 +489,7 @@ class _MyOrdersDetailsState extends State<MyOrdersDetails> {
                                     style: bodyText16w600(color: black),
                                   ),
                                   Text(
-                                    'Rs.${widget.productDetails["totalAmount"]}',
+                                    'Rs.${(widget.productDetails["items"] as List).map((e) => e["price"]).reduce((value, element) => value + element) + widget.productDetails["deliveryFees"]}',
                                     style: bodyText16w600(color: primary),
                                   )
                                 ],

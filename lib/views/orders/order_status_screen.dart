@@ -184,7 +184,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                           style: bodyText14w600(color: black),
                         ),
                         Text(
-                          'Rs.${widget.productDetails["totalAmount"] - widget.productDetails["deliveryFees"]}',
+                          'Rs.${(widget.productDetails["items"] as List).map((e) => e["price"]).reduce((value, element) => value + element)}',
                           style: bodyText14w600(color: black),
                         )
                       ],
@@ -216,7 +216,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                           style: bodyText16w600(color: black),
                         ),
                         Text(
-                          'Rs.${widget.productDetails["totalAmount"]}',
+                          'Rs.${(widget.productDetails["items"] as List).map((e) => e["price"]).reduce((value, element) => value + element) + widget.productDetails["deliveryFees"]}',
                           style: bodyText16w600(color: primary),
                         )
                       ],
@@ -297,12 +297,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       style: bodyText14normal(color: black),
                     ),
                     RatingBar.builder(
-                      initialRating: orderDetais['rating'] != ""
-                          ? double.parse(orderDetais['rating'])
-                          : 4,
+                      initialRating:
+
+                          //  orderDetais['rating'] != ""
+                          //     ? double.parse(orderDetais['rating'])
+                          4,
                       minRating: 1,
-                      ignoreGestures:
-                          orderDetais['rating'] != "" ? true : false,
+                      ignoreGestures: true,
+                      // orderDetais['rating'] != "" ? true : false,
                       itemSize: 40,
                       direction: Axis.horizontal,
                       allowHalfRating: true,

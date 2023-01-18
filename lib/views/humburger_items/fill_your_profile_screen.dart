@@ -31,7 +31,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   void userDetails() {
-    print(widget.existing);
     if (!widget.existing) {
       FirebaseFirestore.instance
           .collection("Users")
@@ -45,7 +44,7 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
         "userID": auth.currentUser!.uid,
         "token": msgToken,
         "image": url
-      }).then((value) => Navigator.push(
+      }).whenComplete(() => Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => const CreateProfileSuccesful())));

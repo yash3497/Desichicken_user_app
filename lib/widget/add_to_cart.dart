@@ -12,6 +12,7 @@ class AddtoCart extends StatefulWidget {
   final String imageURL;
   final String name;
   final String desc;
+  final num vendorPrice;
 
   // final List caseSearch;
   final String id;
@@ -22,20 +23,21 @@ class AddtoCart extends StatefulWidget {
   final bool insideProduct;
   final String catId;
 
-  const AddtoCart(
-      {super.key,
-      required this.vendorId,
-      required this.insideProduct,
-      required this.price,
-      required this.name,
-      required this.desc,
-      required this.id,
-      required this.stock,
-      required this.imageURL,
-      required this.weight,
-      required this.netWeight,
-      required this.catId,
-      });
+  const AddtoCart({
+    super.key,
+    required this.vendorId,
+    required this.insideProduct,
+    required this.price,
+    required this.name,
+    required this.desc,
+    required this.id,
+    required this.stock,
+    required this.imageURL,
+    required this.weight,
+    required this.netWeight,
+    required this.catId,
+    required this.vendorPrice,
+  });
 
   @override
   State<AddtoCart> createState() => _AddtoCartState();
@@ -232,17 +234,18 @@ class _AddtoCartState extends State<AddtoCart> {
                       textColor: Colors.white,
                       fontSize: 16.0);
                   _cart.addtoCart(
-                      widget.vendorId,
-                      widget.imageURL,
-                      widget.id,
-                      widget.price,
-                      widget.price,
-                      widget.name,
-                      widget.desc,
-                      widget.stock,
-                      widget.weight,
-                      widget.netWeight,
-                  widget.catId,
+                    widget.vendorId,
+                    widget.imageURL,
+                    widget.id,
+                    widget.price,
+                    widget.price,
+                    widget.name,
+                    widget.desc,
+                    widget.stock,
+                    widget.weight,
+                    widget.netWeight,
+                    widget.catId,
+                    widget.vendorPrice,
                   );
                   if (mounted)
                     setState(() {

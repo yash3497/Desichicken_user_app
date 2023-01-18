@@ -74,16 +74,19 @@ class _HomeScreenState extends State<HomeScreen> {
         .collection("products")
         .snapshots()
         .listen((event) {
-      setState(() {
-        cartData.clear();
-      });
+      cartData.clear();
+
       for (var doc in event.docs) {
-        setState(() {
-          cartData.add(doc.data());
-        });
+        cartData.add(doc.data());
+      }
+      if (mounted) {
+        setState(() {});
       }
       log(cartList.toString());
     });
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -458,7 +461,7 @@ class _HomeBottomCheckedWidgetState extends State<HomeBottomCheckedWidget> {
       color: Color(0xFFF3F5F2),
       child: Column(
         children: [
-          Container(
+          /*Container(
             height: height(context) * 0.26,
             width: width(context) * 0.8,
             decoration: myFillBoxDecoration(0, white, 15),
@@ -560,7 +563,7 @@ class _HomeBottomCheckedWidgetState extends State<HomeBottomCheckedWidget> {
               ],
             ),
           ),
-          addVerticalSpace(10),
+          addVerticalSpace(10),*/
           Center(
               child: Image.asset(
             'assets/images/mainlogo.png',
@@ -753,7 +756,8 @@ class _HomeProductListWidgetState extends State<HomeProductListWidget> {
                                 imageURL: data[index]['image'],
                                 weight: data[index]['weight'],
                                 netWeight: data[index]['netWeight'],
-                                catId: data[index]['catId'] ,
+                                catId: data[index]['catId'],
+                                vendorPrice: data[index]['vendorPrice'],
                               ),
                             ),
                           )
@@ -937,8 +941,12 @@ class _CategoryTileState extends State<CategoryTile> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    VendorProductScreen(category: widget.categoryId,vendorID: "",vendorName: "", subCategoryId: '',)));
+                builder: (context) => VendorProductScreen(
+                      category: widget.categoryId,
+                      vendorID: "",
+                      vendorName: "",
+                      subCategoryId: '',
+                    )));
         // for going to vendor screen
         /*     Navigator.push(
             context,

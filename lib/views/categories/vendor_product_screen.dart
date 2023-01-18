@@ -48,12 +48,12 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
       productList.clear();
     });
     print(sub);
-    if(sub!=null){
+    if (sub != null) {
       firebaseFirestore
           .collection("Products")
-      // .where("vendorId", isEqualTo: widget.vendorID)
-          .where("categoryId", isEqualTo: widget.category )
-          .where("subCategoryId", isEqualTo:sub )
+          // .where("vendorId", isEqualTo: widget.vendorID)
+          .where("categoryId", isEqualTo: widget.category)
+          .where("subCategoryId", isEqualTo: sub)
           .get()
           .then((value) {
         for (var doc in value.docs) {
@@ -63,10 +63,10 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
           }
         }
       });
-    }else{
+    } else {
       firebaseFirestore
           .collection("Products")
-      // .where("vendorId", isEqualTo: widget.vendorID)
+          // .where("vendorId", isEqualTo: widget.vendorID)
           .where("categoryId", isEqualTo: widget.category)
           .get()
           .then((value) {
@@ -78,7 +78,6 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
         }
       });
     }
-
   }
 
   _fetchCartList() {
@@ -98,12 +97,13 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
       log(cartList.toString());
     });
   }
+
   getSubCats() async {
     var b = await FirebaseFirestore.instance
         .collection("SubCategories")
         .where("categoryId", isEqualTo: widget.category)
         .get();
-    subCats.add({"name":"All"});
+    subCats.add({"name": "All"});
     subCats.addAll(b.docs);
     setState(() {});
   }
@@ -147,32 +147,43 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
                   itemCount: subCats.length,
                   itemBuilder: (context, index) {
                     return InkWell(
-                      onTap: (){
+                      onTap: () {
                         setState(() {
                           selectedIndex = index;
                         });
-                        fetchProducts(sub: index == 0?null:subCats[index]['subCategoryId']);
+                        fetchProducts(
+                            sub: index == 0
+                                ? null
+                                : subCats[index]['subCategoryId']);
                       },
                       child: Card(
-
                         elevation: 5,
                         child: Container(
-                          color:selectedIndex == index ? Colors.red:null,
+                          color: selectedIndex == index ? Colors.red : null,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: [
-                             index == 0?const SizedBox():   SizedBox(
-                                  width: 30,
-                                  height: 35,
-                                  child: Image.network(
-                                    subCats[index]['image'],
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
+                                index == 0
+                                    ? const SizedBox()
+                                    : SizedBox(
+                                        width: 30,
+                                        height: 35,
+                                        child: Image.network(
+                                          subCats[index]['image'],
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
                                 SizedBox(
-                                    width: index == 0?50:null,
-                                    child: Center(child: Text(subCats[index]['name'],style: TextStyle(  color:selectedIndex == index ? Colors.white:null),))),
+                                    width: index == 0 ? 50 : null,
+                                    child: Center(
+                                        child: Text(
+                                      subCats[index]['name'],
+                                      style: TextStyle(
+                                          color: selectedIndex == index
+                                              ? Colors.white
+                                              : null),
+                                    ))),
                               ],
                             ),
                           ),
@@ -206,6 +217,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
                     desc: productList[index]['description'] ?? "",
                     stock: productList[index]['stock'],
                     catId: productList[index]['categoryId'],
+                    vendorPrice: productList[index]['vendorPrice'],
                   );
                 },
               ),
@@ -266,6 +278,7 @@ class ProductTile extends StatefulWidget {
   final String desc;
   final num stock;
   final num price;
+  final num vendorPrice;
   final num rating;
   final String catId;
 
@@ -283,6 +296,7 @@ class ProductTile extends StatefulWidget {
     required this.desc,
     required this.stock,
     required this.catId,
+    required this.vendorPrice,
   });
 
   @override
@@ -401,6 +415,7 @@ class _ProductTileState extends State<ProductTile> {
                             weight: widget.weight,
                             netWeight: widget.netWeight,
                             catId: widget.catId,
+                            vendorPrice: widget.vendorPrice,
                           ),
                         ),
                       )
