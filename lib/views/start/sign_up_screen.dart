@@ -104,16 +104,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
         CustomButton(
             buttonName: 'Create Account',
             onClick: () async {
-              var response= await FirebaseFirestore.instance.collection("users")
-                  .where("Number",isEqualTo: "+91${phonecontroller.text}").get();
+              var response = await FirebaseFirestore.instance
+                  .collection("users")
+                  .where("Number", isEqualTo: "+91${phonecontroller.text}")
+                  .get();
 
-              if(response.docs.isNotEmpty){
+              if (response.docs.isNotEmpty) {
                 Fluttertoast.showToast(msg: "You are already registered");
-              }else{
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => OtpVerify(phonenumber: phonecontroller.text,)));
+              } else {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => OtpVerify(
+                              phonenumber: phonecontroller.text,
+                            )));
               }
-
             }),
         TextButton(
             onPressed: () {

@@ -1005,118 +1005,121 @@ class _CartTileState extends State<CartTile> {
     return FittedBox(
       child: Column(
         children: [
-          Row(
-            children: [
-              Container(
-                decoration: shadowDecoration(15, 0),
-                height: height(context) * 0.08,
-                width: width(context) * 0.2,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
-                    widget.imageURL,
-                    fit: BoxFit.fill,
+          SizedBox(
+            width: width(context) * 0.99,
+            child: Row(
+              children: [
+                Container(
+                  decoration: shadowDecoration(15, 0),
+                  height: height(context) * 0.08,
+                  width: width(context) * 0.2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.network(
+                      widget.imageURL,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
-              ),
-              addHorizontalySpace(10),
-              SizedBox(
-                height: height(context) * 0.08,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.name,
-                      style: bodyText14w600(color: black),
-                    ),
-                    Text(
-                      '${widget.weight}gms I Net: ${widget.netWeight}gms',
-                      style: bodyText11Small(color: black.withOpacity(0.5)),
-                    ),
-                    addVerticalSpace(5),
-                    Row(
-                      children: [
-                        Text(
-                          'Rs.${widget.price}',
-                          style: bodyText14w600(color: primary),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              addHorizontalySpace(40),
-              Container(
-                height: 25,
-                width: width(context) * 0.19,
-                decoration: myFillBoxDecoration(0, primary, 5),
-                child: Center(
-                  child: AddtoCart(
-                    vendorId: FirebaseAuth.instance.currentUser!.uid,
-                    id: widget.id,
-                    insideProduct: true,
-                    price: widget.price,
-                    name: widget.name,
-                    desc: widget.desc,
-                    stock: widget.stock,
-                    imageURL: widget.imageURL,
-                    weight: widget.weight,
-                    netWeight: widget.netWeight,
-                    catId: widget.catId,
-                    vendorPrice: widget.vendorPrice,
+                addHorizontalySpace(10),
+                SizedBox(
+                  height: height(context) * 0.08,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.name,
+                        style: bodyText14w600(color: black),
+                      ),
+                      Text(
+                        '${widget.weight}gms I Net: ${widget.netWeight}gms',
+                        style: bodyText11Small(color: black.withOpacity(0.5)),
+                      ),
+                      addVerticalSpace(5),
+                      Row(
+                        children: [
+                          Text(
+                            'Rs.${widget.price}',
+                            style: bodyText14w600(color: primary),
+                          )
+                        ],
+                      )
+                    ],
                   ),
                 ),
-              ),
+                Spacer(),
+                Container(
+                  height: 25,
+                  width: width(context) * 0.19,
+                  decoration: myFillBoxDecoration(0, primary, 5),
+                  child: Center(
+                    child: AddtoCart(
+                      vendorId: FirebaseAuth.instance.currentUser!.uid,
+                      id: widget.id,
+                      insideProduct: true,
+                      price: widget.price,
+                      name: widget.name,
+                      desc: widget.desc,
+                      stock: widget.stock,
+                      imageURL: widget.imageURL,
+                      weight: widget.weight,
+                      netWeight: widget.netWeight,
+                      catId: widget.catId,
+                      vendorPrice: widget.vendorPrice,
+                    ),
+                  ),
+                ),
 
-              // SizedBox(
-              //   width: width(context) * 0.23,
-              //   child: Row(
-              //     mainAxisAlignment:
-              //         MainAxisAlignment.spaceBetween,
-              //     children: [
-              //       InkWell(
-              //         onTap: () {
-              //           setState(() {
-              //             if (qty > 1) {
-              //               qty--;
-              //             } else if (qty <= 1) {}
-              //           });
-              //         },
-              //         child: Container(
-              //           height: 25,
-              //           width: 25,
-              //           decoration: shadowDecoration(3, 1),
-              //           child: Icon(
-              //             Icons.remove,
-              //             color: primary,
-              //           ),
-              //         ),
-              //       ),
-              //       Text(
-              //         qty.toString(),
-              //         style: bodyText20w700(color: black),
-              //       ),
-              //       InkWell(
-              //         onTap: () {
-              //           setState(() {
-              //             qty++;
-              //           });
-              //         },
-              //         child: Container(
-              //           height: 25,
-              //           width: 25,
-              //           decoration: shadowDecoration(3, 1),
-              //           child: Icon(
-              //             Icons.add,
-              //             color: primary,
-              //           ),
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // )
-            ],
+                // SizedBox(
+                //   width: width(context) * 0.23,
+                //   child: Row(
+                //     mainAxisAlignment:
+                //         MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       InkWell(
+                //         onTap: () {
+                //           setState(() {
+                //             if (qty > 1) {
+                //               qty--;
+                //             } else if (qty <= 1) {}
+                //           });
+                //         },
+                //         child: Container(
+                //           height: 25,
+                //           width: 25,
+                //           decoration: shadowDecoration(3, 1),
+                //           child: Icon(
+                //             Icons.remove,
+                //             color: primary,
+                //           ),
+                //         ),
+                //       ),
+                //       Text(
+                //         qty.toString(),
+                //         style: bodyText20w700(color: black),
+                //       ),
+                //       InkWell(
+                //         onTap: () {
+                //           setState(() {
+                //             qty++;
+                //           });
+                //         },
+                //         child: Container(
+                //           height: 25,
+                //           width: 25,
+                //           decoration: shadowDecoration(3, 1),
+                //           child: Icon(
+                //             Icons.add,
+                //             color: primary,
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // )
+              ],
+            ),
           ),
           const Divider(
             thickness: 1,

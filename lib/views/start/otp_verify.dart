@@ -131,7 +131,7 @@ class _OtpVerifyState extends State<OtpVerify> {
       });
     } catch (e) {
       FocusScope.of(context).unfocus();
-      // print(e);
+      log(e.toString());
     }
   }
 

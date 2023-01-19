@@ -138,7 +138,7 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
       UploadTask uploadTask = reference.putFile(File(image.path));
       TaskSnapshot snapshot = await uploadTask;
       url = await (snapshot).ref.getDownloadURL();
-      print(url);
+      log(url);
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
     }
@@ -163,15 +163,21 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
           Center(
             child: Stack(
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.grey.shade500,
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 50,
-                    color: white,
-                  ),
-                ),
+                url != ''
+                    ? CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey.shade500,
+                        backgroundImage: NetworkImage(url),
+                      )
+                    : CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey.shade500,
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: 50,
+                          color: white,
+                        ),
+                      ),
                 Positioned(
                     bottom: 1,
                     right: 1,
