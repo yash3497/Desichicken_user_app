@@ -6,6 +6,8 @@ import 'package:delicious_app/widget/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -32,6 +34,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     initialCameraPosition =
         CameraPosition(target: LatLng(latitude, longitude), zoom: 14.0);
+    _fetchCurrentAddress();
   }
 
   GoogleMapController? mapController;
@@ -41,6 +44,7 @@ class _MapScreenState extends State<MapScreen> {
   final Mode _mode = Mode.overlay;
 
   String location = "";
+  var newlatlang = LatLng(latitude, longitude);
 
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled;
@@ -68,6 +72,16 @@ class _MapScreenState extends State<MapScreen> {
       return false;
     }
     return true;
+  }
+
+  _fetchCurrentAddress() async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude, longitude,
+        localeIdentifier: 'en_IN');
+    setState(() {
+      location =
+          "${placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].administrativeArea}, ${placemarks[0].country}";
+    });
   }
 
   @override
@@ -152,7 +166,9 @@ class _MapScreenState extends State<MapScreen> {
                       final geometry = detail.result.geometry!;
                       final lat = geometry.location.lat;
                       final lang = geometry.location.lng;
-                      var newlatlang = LatLng(lat, lang);
+                      setState(() {
+                        newlatlang = LatLng(lat, lang);
+                      });
 
                       markersList.clear();
                       markersList.add(Marker(
@@ -188,7 +204,26 @@ class _MapScreenState extends State<MapScreen> {
                               location,
                               style: TextStyle(fontSize: 18),
                             ),
-                            trailing: Icon(Icons.search),
+                            trailing: Column(
+                              children: [
+                                Icon(Icons.search),
+                                GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ChooseDeliveryLocation(
+                                                    position: CameraPosition(
+                                                        target: newlatlang,
+                                                        zoom: 17),
+                                                    markersList: markersList,
+                                                    location: location,
+                                                  )));
+                                    },
+                                    child: Icon(Icons.send)),
+                              ],
+                            ),
                             dense: true,
                           )),
                     ),
