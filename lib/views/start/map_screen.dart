@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -134,7 +133,6 @@ class _MapScreenState extends State<MapScreen> {
                   },
                 ),
               ),
-
               InkWell(
                   onTap: () async {
                     var place = await PlacesAutocomplete.show(
@@ -186,11 +184,6 @@ class _MapScreenState extends State<MapScreen> {
                                     location: detail.result.formattedAddress
                                         .toString(),
                                   )));
-
-                      //move map camera to selected place with animation
-                      // mapController!.animateCamera(
-                      //     CameraUpdate.newCameraPosition(CameraPosition(
-                      //         target: newlatlang, zoom: 17)));
                     }
                   },
                   child: Padding(
@@ -228,88 +221,10 @@ class _MapScreenState extends State<MapScreen> {
                           )),
                     ),
                   )),
-
-              // TextField(
-              //   onTap: () {
-              //     Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //             builder: (context) => ChooseDeliveryLocation()));
-              //   },
-              //   decoration: InputDecoration(
-              //       border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(10.0),
-              //       ),
-              //       filled: true,
-              //       hintStyle: TextStyle(color: Colors.grey[800]),
-              //       hintText: "Search",
-              //       fillColor: Colors.white70),
-              // )
             ],
           ),
         ),
       ),
-      // Container(
-      //   width: width(context),
-      //   decoration: const BoxDecoration(
-      //       image: DecorationImage(
-      //           fit: BoxFit.fill, image: AssetImage('assets/images/Maps.png'))),
-      //   child: SafeArea(
-      //     child: Column(
-      //       children: [
-      //         addVerticalSpace(10),
-      //         CustomTextfield(
-      //           hintext: 'Find Your Location',
-      //           prefixIcon: Icon(
-      //             Icons.search,
-      //             color: primary,
-      //           ),
-      //         ),
-      //         addVerticalSpace(height(context) * 0.3),
-      //         const Icon(
-      //           Icons.location_on,
-      //           color: Colors.green,
-      //           size: 50,
-      //         ),
-      //         addVerticalSpace(height(context) * 0.3),
-      //         Container(
-      //           color: white,
-      //           height: height(context) * 0.2,
-      //           width: width(context) * 0.9,
-      //           padding: EdgeInsets.all(10),
-      //           child: Column(
-      //             crossAxisAlignment: CrossAxisAlignment.start,
-      //             mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //             children: [
-      //               const Text('Your location'),
-      //               Row(
-      //                 children: [
-      //                   Image.asset('assets/images/locationicon.png'),
-      //                   addHorizontalySpace(10),
-      //                   SizedBox(
-      //                     width: width(context) * 0.6,
-      //                     child: Text(
-      //                       '4517 Washington Ave. Manchester, Kentucky 39495',
-      //                       style: bodyText14w600(color: black),
-      //                     ),
-      //                   ),
-      //                 ],
-      //               ),
-      //               CustomButton(
-      //                   buttonName: 'Set Location',
-      //                   onClick: () {
-      //                     Navigator.push(
-      //                         context,
-      //                         MaterialPageRoute(
-      //                             builder: (context) => NavBar()));
-      //                   })
-      //             ],
-      //           ),
-      //         )
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

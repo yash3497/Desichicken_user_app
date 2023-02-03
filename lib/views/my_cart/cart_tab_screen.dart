@@ -540,8 +540,9 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     });
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     var orderId = "${DateTime.now().microsecondsSinceEpoch}";
+    List tokenList = [];
     sendNotification(orderId, "New Order Successful", token);
     Map aa = {};
     for (var i in cartList) {
@@ -595,8 +596,25 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         "vendorNumber": vendorNumber,
         "rating": "",
       });
+      await FirebaseFirestore.instance
+          .collection('vendors')
+          .doc(j)
+          .get()
+          .then((value) {
+        // log("distance${doc.data()}");
+        var doc = value.data();
+        if (doc!.keys.contains("latitude") &&
+            doc.keys.contains("longitude") &&
+            doc.keys.contains("token")) {
+          if ((calculateDistance(
+                  latitude, longitude, doc["latitude"], doc["longitude"])) <=
+              5) {
+            tokenList.add(doc["token"]);
+          }
+        }
+      });
     }
-    for (var doc in vendorTokenList) {
+    for (var doc in tokenList) {
       sendNotification(
           // "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
           "New Order Received",
