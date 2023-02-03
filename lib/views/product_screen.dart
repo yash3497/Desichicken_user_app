@@ -36,7 +36,7 @@ class _ProductScreenState extends State<ProductScreen> {
         .collection("Products")
         .doc(widget.id)
         .get();
-    String catId = a['categoryId'];
+    var catId = a['categoryId'];
     var b = await FirebaseFirestore.instance
         .collection("SubCategories")
         .where("categoryId", isEqualTo: catId)
@@ -106,19 +106,21 @@ class _ProductScreenState extends State<ProductScreen> {
                               itemCount: subCats.length,
                               itemBuilder: (context, index) {
                                 return InkWell(
-                                  onTap: (){
+                                  onTap: () {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => VendorProductScreen(
-                                              category: subCats[index]['name'],
-                                              vendorID: '',
-                                              vendorName: '',
-                                              subCategoryId: subCats[index]['subCategoryId'],
-                                            )));
+                                            builder: (context) =>
+                                                VendorProductScreen(
+                                                  category: subCats[index]
+                                                      ['name'],
+                                                  vendorID: '',
+                                                  vendorName: '',
+                                                  subCategoryId: subCats[index]
+                                                      ['subCategoryId'],
+                                                )));
                                   },
                                   child: Card(
-
                                     elevation: 5,
                                     child: Row(
                                       children: [

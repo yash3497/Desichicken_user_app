@@ -525,6 +525,8 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   var userDetails;
   String vendorId = '';
   String vendorNumber = '';
+  List vendorList = [];
+  Map product = {};
 
   fetchUserDetails() {
     userDetails = FirebaseFirestore.instance
@@ -542,23 +544,9 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     var orderId = "${DateTime.now().microsecondsSinceEpoch}";
-    List tokenList = [];
     sendNotification(orderId, "New Order Successful", token);
-    Map aa = {};
-    for (var i in cartList) {
-      String vId = i['vendorId'];
-      if (aa[vId] != null) {
-        List temp = aa[vId];
-        temp.add(i);
-        aa[vId] = temp;
-      } else {
-        List temp = [];
-        temp.add(i);
-        aa[vId] = temp;
-      }
-    }
-    print(aa);
-    for (var j in aa.keys) {
+
+    for (var j in vendorList) {
       FirebaseFirestore.instance.collection("Orders").doc().set({
         "pickupAddress": "",
         "deliveryAddress": currentAddress,
@@ -583,7 +571,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
             ((widget.cartamount) * (discount / 100)) +
             (widget.cartamount < 500 ? widget.deliveryFee : 0)),
         "createdAt": Timestamp.now(),
-        "items": aa[j],
+        "items": product[j],
         "discount": (widget.cartamount) * (discount / 100),
         "paymentId": response.paymentId!,
         "paymentMethod": "ONLINE",
@@ -596,25 +584,8 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         "vendorNumber": vendorNumber,
         "rating": "",
       });
-      await FirebaseFirestore.instance
-          .collection('vendors')
-          .doc(j)
-          .get()
-          .then((value) {
-        // log("distance${doc.data()}");
-        var doc = value.data();
-        if (doc!.keys.contains("latitude") &&
-            doc.keys.contains("longitude") &&
-            doc.keys.contains("token")) {
-          if ((calculateDistance(
-                  latitude, longitude, doc["latitude"], doc["longitude"])) <=
-              5) {
-            tokenList.add(doc["token"]);
-          }
-        }
-      });
     }
-    for (var doc in tokenList) {
+    for (var doc in vendorTokenList) {
       sendNotification(
           // "New Order Received", "\n by${userDetails["Name"]}", doc.trim());
           "New Order Received",
@@ -695,22 +666,55 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   List<String> vendorTokenList = [];
 
   Future<void> fetchIsVendorAvailable() async {
-    vendorTokenList.clear();
-    await FirebaseFirestore.instance.collection('vendors').get().then((value) {
-      for (var doc in value.docs) {
-        // log("distance${doc.data()}");
-
-        if (doc.data().keys.contains("latitude") &&
-            doc.data().keys.contains("longitude") &&
-            doc.data().keys.contains("token")) {
-          if ((calculateDistance(
-                  latitude, longitude, doc["latitude"], doc["longitude"])) <=
-              5) {
-            vendorTokenList.add(doc.data()["token"]);
-          }
-        }
+    Map aa = {};
+    for (var i in cartList) {
+      String vId = i['catId'];
+      if (aa[vId] != null) {
+        List temp = aa[vId];
+        temp.add(i);
+        aa[vId] = temp;
+      } else {
+        List temp = [];
+        temp.add(i);
+        aa[vId] = temp;
       }
-    });
+    }
+    for (var i in aa.keys) {
+      await FirebaseFirestore.instance
+          .collection('vendors')
+          .where('cats', arrayContains: int.parse(i))
+          .get()
+          .then((value) {
+        //sort vendors by distance from customer lat long
+        if (value.docs.isEmpty) {
+          Fluttertoast.showToast(msg: "No Vendor Available");
+          return;
+        }
+        value.docs.sort((a, b) {
+          double aDistance = calculateDistance(
+              latitude,
+              longitude,
+              double.parse(a.data()["latitude"].toString()),
+              double.parse(a.data()["longitude"].toString()));
+          double bDistance = calculateDistance(
+              latitude,
+              longitude,
+              double.parse(b.data()["latitude"].toString()),
+              double.parse(b.data()["longitude"].toString()));
+          return aDistance.compareTo(bDistance);
+        });
+        //get the nearest vendor
+        vendorList.add(value.docs[0].id);
+        vendorTokenList.add(value.docs[0].data()["token"]);
+        if (product[value.docs[0].id] != null) {
+          List temp = product[value.docs[0].id];
+          temp.addAll(aa[i]);
+          product[value.docs[0].id] = temp;
+        } else {
+          product[value.docs[0].id] = aa[i];
+        }
+      });
+    }
   }
 
   Future sendNotification(String title, String body, String token) async {

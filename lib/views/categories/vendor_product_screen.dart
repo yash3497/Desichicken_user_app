@@ -51,9 +51,8 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
     if (sub != null) {
       firebaseFirestore
           .collection("Products")
-          // .where("vendorId", isEqualTo: widget.vendorID)
-          .where("categoryId", isEqualTo: widget.category)
-          .where("subCategoryId", isEqualTo: sub)
+          .where("categoryId", isEqualTo: int.parse(widget.category))
+          .where("subCategoryId", isEqualTo: int.parse(sub))
           .get()
           .then((value) {
         for (var doc in value.docs) {
@@ -64,14 +63,17 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
         }
       });
     } else {
+      print(widget.category);
       firebaseFirestore
           .collection("Products")
           // .where("vendorId", isEqualTo: widget.vendorID)
-          .where("categoryId", isEqualTo: widget.category)
+          .where("categoryId", isEqualTo: int.parse(widget.category))
           .get()
           .then((value) {
+        print(value.docs);
         for (var doc in value.docs) {
           productList.add(doc.data());
+          print(productList);
           if (mounted) {
             setState(() {});
           }
@@ -101,7 +103,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
   getSubCats() async {
     var b = await FirebaseFirestore.instance
         .collection("SubCategories")
-        .where("categoryId", isEqualTo: widget.category)
+        .where("categoryId", isEqualTo: int.parse(widget.category))
         .get();
     subCats.add({"name": "All"});
     subCats.addAll(b.docs);
@@ -216,7 +218,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
                     id: productList[index]['id'] ?? "10",
                     desc: productList[index]['description'] ?? "",
                     stock: productList[index]['stock'],
-                    catId: productList[index]['categoryId'],
+                    catId: productList[index]['categoryId'].toString(),
                     vendorPrice: productList[index]['vendorPrice'],
                   );
                 },

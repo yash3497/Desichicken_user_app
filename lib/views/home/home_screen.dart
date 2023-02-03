@@ -341,7 +341,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             return CategoryTile(
                               imageURL: data.docs[index]['ImageURL'],
                               title: data.docs[index]['Name'],
-                              categoryId: data.docs[index]['categoryId'],
+                              categoryId:
+                                  data.docs[index]['categoryId'].toString(),
                             );
                           },
                         );
