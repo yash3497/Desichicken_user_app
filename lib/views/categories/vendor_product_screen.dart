@@ -85,7 +85,7 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
   _fetchCartList() {
     FirebaseFirestore.instance
         .collection('Cart')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("products")
         .snapshots()
         .listen((event) {

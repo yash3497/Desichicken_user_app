@@ -107,17 +107,20 @@ class _ProductScreenState extends State<ProductScreen> {
                               itemBuilder: (context, index) {
                                 return InkWell(
                                   onTap: () {
+                                    print(subCats[index]['subCategoryId']);
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 VendorProductScreen(
                                                   category: subCats[index]
-                                                      ['name'],
+                                                          ['categoryId']
+                                                      .toString(),
                                                   vendorID: '',
                                                   vendorName: '',
                                                   subCategoryId: subCats[index]
-                                                      ['subCategoryId'],
+                                                          ['subCategoryId']
+                                                      .toString(),
                                                 )));
                                   },
                                   child: Card(

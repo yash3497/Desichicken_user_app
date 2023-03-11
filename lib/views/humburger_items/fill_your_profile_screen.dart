@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/utils/constants.dart';
-import 'package:delicious_app/views/start/otp_verify.dart';
+import 'package:delicious_app/views/humburger_items/edit_profile_otp_screen.dart';
 import 'package:delicious_app/widget/custom_gradient_button.dart';
 import 'package:delicious_app/widget/custom_textfield.dart';
 import 'package:delicious_app/widget/humburger_screen.dart';
+import 'package:delicious_app/widget/login_popup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../widget/custom_appbar.dart';
+import '../start/otp_verify.dart';
 
 class FillYourProfileScreen extends StatefulWidget {
   final bool existing;
@@ -49,18 +51,46 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
               MaterialPageRoute(
                   builder: (context) => const CreateProfileSuccesful())));
     } else {
+      if (oldNumber.replaceAll("+91", "") !=
+          mobileController.text.replaceAll("+91", "")) {
+        log(true.toString());
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EditProfileOTPVerify(
+                        phonenumber:
+                            mobileController.text.replaceAll("+91", ""),
+                        data: {
+                          "Address": "",
+                          "Email": emailController.text,
+                          "Name": nameController.text,
+                          "Surname": surnameController.text,
+                          "Number": auth.currentUser!.phoneNumber,
+                          "userID": auth.currentUser!.uid,
+                          "token": msgToken,
+                          "image": url
+                        })));
+        return;
+      }
       FirebaseFirestore.instance
           .collection("Users")
-          .doc(auth.currentUser!.uid)
+          .doc(auth.currentUser?.uid)
           .update({
-        "Address": "",
         "Email": emailController.text,
         "Name": nameController.text,
+        "SurName": surnameController.text,
         "Number": auth.currentUser!.phoneNumber,
         "userID": auth.currentUser!.uid,
         "token": msgToken,
         "image": url
-      }).then((value) => Navigator.pop(context));
+      }).then((value) {
+        userDetail['Name'] = nameController.text;
+        userDetail['SurName'] = surnameController.text;
+        userDetail["Email"] = emailController.text;
+        userDetail["image"] = url;
+        userDetail["Number"] = mobileController.text;
+        Navigator.pop(context);
+      });
     }
   }
 
@@ -68,6 +98,8 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
   TextEditingController surnameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController dobController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
+  String oldNumber = '';
 
   @override
   void initState() {
@@ -86,6 +118,9 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
       surnameController.text = userDetail["Surname"];
       emailController.text = userDetail["Email"];
       dobController.text = userDetail["Name"];
+      url = userDetail["image"];
+      oldNumber = userDetail["Number"];
+      mobileController.text = userDetail["Number"];
     }
   }
 
@@ -226,11 +261,20 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
             controller: emailController,
           ),
           addVerticalSpace(20),
+          CustomTextfield(
+            hintext: 'Mobile Number',
+            controller: mobileController,
+          ),
+          addVerticalSpace(20),
           addVerticalSpace(height(context) * 0.23),
           CustomButton(
               buttonName: 'Done',
               onClick: () {
-                userDetails();
+                if (auth.currentUser != null) {
+                  userDetails();
+                } else {
+                  showLoginPopup(context);
+                }
                 // Navigator.push(
                 //     context,
                 //     MaterialPageRoute(

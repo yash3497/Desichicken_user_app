@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../utils/constants.dart';
 import '../../widget/custom_appbar.dart';
@@ -17,6 +20,7 @@ class _CouponScreenState extends State<CouponScreen> {
   double discount = 0;
 
   FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  final controller = TextEditingController();
 
   var currentUid = FirebaseAuth.instance.currentUser!.uid;
   List couponList = [];
@@ -35,6 +39,24 @@ class _CouponScreenState extends State<CouponScreen> {
   void initState() {
     fetchCoupons();
     super.initState();
+  }
+
+  Future<double> fetchDiscount(String code) async {
+    double discountX = 0;
+    var doc = await firebaseFirestore
+        .collection("Coupons")
+        .where('couponCode', isEqualTo: code)
+        .get()
+        .then((value) {
+      if (value.docs.isEmpty) {
+        Fluttertoast.showToast(msg: 'Invalid Coupon Code');
+        discountX = 0;
+      } else {
+        discountX =
+            double.parse(value.docs[0].data()['discountRate'].toString());
+      }
+    });
+    return discountX;
   }
 
   @override
@@ -56,18 +78,21 @@ class _CouponScreenState extends State<CouponScreen> {
                   height: height(context) * 0.05,
                   width: width(context) * 0.6,
                   child: TextField(
+                    controller: controller,
                     decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: discount == 0
-                            ? 'Enter Coupon Code'
-                            : "${discount.toStringAsFixed(0)} %",
+                        hintText: 'Enter Coupon Code',
                         contentPadding: EdgeInsets.only(left: 20),
                         hintStyle: bodyText13normal(color: black)),
                   ),
                 ),
                 TextButton(
-                    onPressed: () {
-                      Navigator.pop(context, discount);
+                    onPressed: () async {
+                      discount = await fetchDiscount(controller.text);
+                      log(discount.toString());
+                      if (discount > 0) {
+                        Navigator.pop(context, discount);
+                      }
                     },
                     child: Text(
                       'Apply',
@@ -104,14 +129,12 @@ class _CouponScreenState extends State<CouponScreen> {
                               child: RichText(
                                   text: TextSpan(children: [
                                 TextSpan(
-                                    text:
-                                        'Use code TWENTY OFF & get ${couponList[i]["discountRate"]} % off on your 1st order'
-                                        ' above Rs.129. Maximum discount Rs. 20',
+                                    text: '${couponList[i]["descText"]}',
                                     style: bodyText13normal(
                                         color: black.withOpacity(0.7))),
-                                TextSpan(
-                                    text: ' +MORE',
-                                    style: bodyText13normal(color: primary))
+                                // TextSpan(
+                                //     text: ' +MORE',
+                                //     style: bodyText13normal(color: primary))
                               ])),
                             ),
                             addVerticalSpace(10),
@@ -129,7 +152,7 @@ class _CouponScreenState extends State<CouponScreen> {
                                     color: ligthRed,
                                     child: Center(
                                       child: Text(
-                                        'CRAVINGS',
+                                        '${couponList[i]["couponCode"]}',
                                         style: bodyText13normal(color: primary),
                                       ),
                                     ),
@@ -140,6 +163,9 @@ class _CouponScreenState extends State<CouponScreen> {
                                       discount = double.parse(couponList[i]
                                               ["discountRate"]
                                           .toString());
+                                      controller.text = couponList[i]
+                                              ["couponCode"]
+                                          .toString();
                                       setState(() {});
                                     },
                                     child: Text(

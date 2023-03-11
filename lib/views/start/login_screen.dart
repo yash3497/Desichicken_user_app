@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../widget/BottomNavBar.dart';
 import '../../widget/custom_gradient_button.dart';
 import '../../widget/custom_textfield.dart';
 import '../humburger_items/fill_your_profile_screen.dart';
@@ -225,7 +226,40 @@ class _LogInScreenState extends State<LogInScreen> {
                         }*/
                       },
                     ),
-                    addVerticalSpace(height(context) * 0.06),
+                    addVerticalSpace(height(context) * 0.03),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const BottomNavBar(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Take a Tour of App  ',
+                            style: bodytext12Bold(color: black)
+                                .copyWith(fontSize: 14),
+                          ),
+                          Text(
+                            'Skip Login',
+                            style: bodytext12Bold(color: primary)
+                                .copyWith(fontSize: 14),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: primary,
+                            size: 16,
+                          )
+                        ],
+                      ),
+                    ),
+                    addVerticalSpace(height(context) * 0.03),
                     Text(
                       'Or Continue With',
                       style: bodytext12Bold(color: black),

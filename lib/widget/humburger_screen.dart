@@ -23,20 +23,22 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  final Stream<QuerySnapshot> userDetails = FirebaseFirestore.instance
-      .collection('Users')
-      .where('Number',
-          isEqualTo: FirebaseAuth.instance.currentUser!.phoneNumber)
-      .snapshots();
+  // final Stream<DocumentSnapshot<Map<String, dynamic>>> userDetails =
+  //     FirebaseFirestore.instance
+  //         .collection('Users')
+  //         .doc(FirebaseAuth.instance.currentUser?.uid)
+  //         .snapshots();
 
   getCurrentUser() {
     userDetail = FirebaseFirestore.instance
         .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.phoneNumber)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .get()
         .then((value) {
       log(value.data().toString());
       userDetail = value.data();
+      userProfile = userDetail['image'];
+      userName = userDetail['Name'];
       if (mounted) {
         setState(() {});
       }
@@ -46,10 +48,12 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   void initState() {
     getCurrentUser();
+    log("${FirebaseAuth.instance.currentUser?.phoneNumber}");
     super.initState();
   }
 
   String userProfile = '';
+  String userName = '';
 
   @override
   Widget build(BuildContext context) {
@@ -61,32 +65,16 @@ class _MyDrawerState extends State<MyDrawer> {
             leading: CircleAvatar(
               backgroundColor: white,
               radius: 30,
-              child: userProfile != ""
+              child: userProfile != "" && userProfile != null
                   ? Image.network(userProfile)
                   : Image.asset(
                       'assets/images/myprofile.png',
                       fit: BoxFit.fill,
                     ),
             ),
-            title: StreamBuilder<QuerySnapshot>(
-                stream: userDetails,
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("Something wrong occurred");
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text("Loading");
-                  }
-                  final data = snapshot.requireData;
-                  if (snapshot.hasData) {
-                    userProfile = data.docs[0]['image'];
-                  }
-
-                  return Text(data.docs[0]['Name'] ?? "Name");
-                }),
-            subtitle:
-                Text(FirebaseAuth.instance.currentUser!.phoneNumber.toString()),
+            title: Text(userName != "" && userName != null ? userName : "Name"),
+            subtitle: Text(
+                "${FirebaseAuth.instance.currentUser?.phoneNumber ?? "+911111111111"}"),
             onTap: () {
               Navigator.push(
                   context,

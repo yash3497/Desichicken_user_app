@@ -3,12 +3,14 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/utils/constants.dart';
 import 'package:delicious_app/views/humburger_items/contact_us_screen.dart';
+import 'package:delicious_app/views/orders/bank_account_details_page.dart';
 import 'package:delicious_app/widget/custom_appbar.dart';
 import 'package:delicious_app/widget/custom_gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class OrderStatusScreen extends StatefulWidget {
   final Map productDetails;
@@ -31,18 +33,20 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   }
 
   var orderDetais;
+  bool riderAccepted = false;
 
   fetchOrderDetails(orderId) async {
     await FirebaseFirestore.instance
         .collection("Orders")
-        .doc(orderId)
+        .where('orderId', isEqualTo: orderId)
         .get()
         .then((value) {
-      log(value.data().toString());
-      orderDetais = value.data();
-      if (mounted) {
-        setState(() {});
+      if (value.docs.length == 0) {
+        return;
       }
+      orderDetais = value.docs.first.data();
+
+      setState(() {});
     });
   }
 
@@ -107,7 +111,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                               ),
                               addHorizontalySpace(10),
                               SizedBox(
-                                height: height(context) * 0.08,
+                                width: width(context) * 0.5,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment:
@@ -145,7 +149,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                   ],
                                 ),
                               ),
-                              addHorizontalySpace(40),
+                              // addHorizontalySpace(40),
                               Container(
                                 height: 30,
                                 width: width(context) * 0.2,
@@ -227,49 +231,49 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               addVerticalSpace(15),
               orderDetais != null
                   ? StepperProgressWidget(
-                      stepperDetails: {
-                        "acceptTime":
-                            orderDetais["acceptTime"] ?? "Order not accepted",
-                        "deliveryTime":
-                            orderDetais["deliveryTime"] ?? "In Process",
-                        "deliveryDate": orderDetais["deliveryDate"],
-                        "orderId": orderDetais["orderId"],
-                        "orderCompleted": orderDetais["orderCompleted"],
-                      },
+                      stepperDetails: orderDetais,
                     )
                   : SizedBox(),
               addVerticalSpace(15),
-              Container(
-                margin: const EdgeInsets.all(1),
-                height: height(context) * 0.09,
-                width: width(context) * 0.93,
-                decoration: shadowDecoration(10, 2),
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        const CircleAvatar(
-                          backgroundImage:
-                              AssetImage('assets/images/rajesh.png'),
-                        ),
-                        RichText(
-                            text: TextSpan(children: [
-                          TextSpan(
-                              text: widget.productDetails["deliveryPerson"],
-                              style: bodyText14w600(color: black)),
-                          TextSpan(
-                              text:
-                                  'is your delivery boy \ncontact him and get details of your order',
-                              style: bodyText13normal(color: black))
-                        ])),
-                        Icon(
-                          Icons.call,
-                          color: primary,
-                        )
-                      ]),
-                ),
-              ),
+              widget.productDetails['orderAccepted']
+                  ? Container(
+                      margin: const EdgeInsets.all(1),
+                      height: height(context) * 0.09,
+                      width: width(context) * 0.93,
+                      decoration: shadowDecoration(10, 2),
+                      child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              const CircleAvatar(
+                                backgroundImage:
+                                    AssetImage('assets/images/rajesh.png'),
+                              ),
+                              RichText(
+                                  text: TextSpan(children: [
+                                TextSpan(
+                                    text:
+                                        widget.productDetails["deliveryPerson"],
+                                    style: bodyText14w600(color: black)),
+                                TextSpan(
+                                    text:
+                                        'is your delivery boy \ncontact him and get details of your order',
+                                    style: bodyText13normal(color: black))
+                              ])),
+                              InkWell(
+                                onTap: () {
+                                  //launch phone dialer
+                                },
+                                child: Icon(
+                                  Icons.call,
+                                  color: primary,
+                                ),
+                              )
+                            ]),
+                      ),
+                    )
+                  : SizedBox(),
               addVerticalSpace(15),
               Container(
                 margin: const EdgeInsets.all(2),
@@ -530,11 +534,20 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
                       child: CustomButton(
                           buttonName: 'Yes',
                           onClick: () {
-                            FirebaseFirestore.instance
-                                .collection("Orders")
-                                .doc(widget.stepperDetails["orderId"])
-                                .update({"orderCancelled": true}).then((value) {
-                              Navigator.pop(context);
+                            Fluttertoast.showToast(
+                                msg:
+                                    'Please Fill Your Bank Account Details For Refund');
+                            Navigator.pop(context);
+                            Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => BankAccountForm(
+                                            orderId: widget
+                                                .stepperDetails["orderId"])))
+                                .then((value) {
+                              setState(() {
+                                widget.stepperDetails['orderCancelled'] = value;
+                              });
                             });
                           }))
                 ],
@@ -550,7 +563,9 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
   Widget build(BuildContext context) {
     List<Step> steps = [
       Step(
-        state: StepState.complete,
+        state: widget.stepperDetails['orderAccept'] == true
+            ? StepState.complete
+            : StepState.disabled,
         title: FittedBox(
           child: Row(
             children: [
@@ -562,7 +577,7 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
                     text: TextSpan(children: [
                   TextSpan(
                       text: 'Order Confirmed', style: TextStyle(color: black)),
-                  !widget.stepperDetails['orderCompleted']
+                  !widget.stepperDetails['orderProcess']
                       ? const TextSpan(
                           text: '\nCancel order',
                           style: TextStyle(fontSize: 12, color: Colors.orange))
@@ -573,7 +588,8 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
               RichText(
                   text: TextSpan(children: [
                 TextSpan(
-                    text: '${widget.stepperDetails["acceptTime"].toString()}\n',
+                    text:
+                        '${widget.stepperDetails['orderAccept'] == false ? 'Order is not accepted' : widget.stepperDetails["acceptTime"].toString()}\n',
                     style: TextStyle(color: black)),
                 /*     const TextSpan(
                       text: '\n2:35 AM',
@@ -586,7 +602,38 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
         isActive: true,
       ),
       Step(
-        state: StepState.complete,
+        state: widget.stepperDetails['orderProcess'] == true
+            ? StepState.complete
+            : StepState.disabled,
+        title: FittedBox(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              RichText(
+                  text: TextSpan(children: [
+                TextSpan(text: 'Order Ready', style: TextStyle(color: black)),
+              ])),
+              addHorizontalySpace(20),
+              RichText(
+                  text: TextSpan(children: [
+                TextSpan(
+                    text:
+                        '${widget.stepperDetails['orderProcess'] == false ? '' : widget.stepperDetails["readyTime"].toString()}\n',
+                    style: TextStyle(color: black)),
+                /*     const TextSpan(
+                      text: '\n2:35 AM',
+                      style: TextStyle(fontSize: 12, color: Colors.black54))*/
+              ])),
+            ],
+          ),
+        ),
+        content: const Text(''),
+        isActive: widget.stepperDetails['orderAccept'] == true ? true : false,
+      ),
+      Step(
+        state: widget.stepperDetails['orderShipped'] == true
+            ? StepState.complete
+            : StepState.disabled,
         title: FittedBox(
           child: Row(
             children: [
@@ -602,7 +649,7 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
                   text: TextSpan(children: [
                 TextSpan(
                     text:
-                        '${widget.stepperDetails["deliveryTime"].toString()}\n',
+                        '${widget.stepperDetails['orderShipped'] == true ? widget.stepperDetails["shippedTime"].toString() : ""}\n',
                     style: TextStyle(color: black)),
                 /*const TextSpan(
                         text: '\n1:35 AM',
@@ -612,7 +659,7 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
           ),
         ),
         content: const Text(''),
-        isActive: true,
+        isActive: widget.stepperDetails['orderProcess'],
       ),
       Step(
         title: FittedBox(
@@ -640,15 +687,17 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
           ),
         ),
         content: const Text(''),
-        state: StepState.complete,
-        isActive: true,
+        state: widget.stepperDetails['orderCompleted']
+            ? StepState.complete
+            : StepState.disabled,
+        isActive: widget.stepperDetails['orderShipped'],
       ),
     ];
 
     return Container(
       margin: const EdgeInsets.all(1),
       padding: const EdgeInsets.all(10),
-      height: height(context) * 0.35,
+      // height: height(context) * 0.35,
       width: width(context) * 0.93,
       decoration: shadowDecoration(10, 2),
       child: Theme(
@@ -657,38 +706,47 @@ class _StepperProgressWidgetState extends State<StepperProgressWidget> {
                 primary: const Color.fromRGBO(42, 217, 87, 1),
               ),
         ),
-        child: Stepper(
-          physics: const NeverScrollableScrollPhysics(),
-          controlsBuilder: (context, details) {
-            return Container();
-          },
-          currentStep: this.current_step,
-          steps: steps,
-          type: StepperType.vertical,
-          onStepTapped: (step) {
-            setState(() {
-              current_step = step;
-            });
-          },
-          onStepContinue: () {
-            setState(() {
-              if (current_step < steps.length - 1) {
-                current_step = current_step + 1;
-              } else {
-                current_step = 0;
-              }
-            });
-          },
-          onStepCancel: () {
-            setState(() {
-              if (current_step > 0) {
-                current_step = current_step - 1;
-              } else {
-                current_step = 0;
-              }
-            });
-          },
-        ),
+        child: widget.stepperDetails["orderCancelled"] == false
+            ? Stepper(
+                physics: const NeverScrollableScrollPhysics(),
+                controlsBuilder: (context, details) {
+                  return Container();
+                },
+                currentStep: this.current_step,
+                steps: steps,
+                type: StepperType.vertical,
+                onStepTapped: (step) {
+                  setState(() {
+                    current_step = step;
+                  });
+                },
+                onStepContinue: () {
+                  setState(() {
+                    if (current_step < steps.length - 1) {
+                      current_step = current_step + 1;
+                    } else {
+                      current_step = 0;
+                    }
+                  });
+                },
+                onStepCancel: () {
+                  setState(() {
+                    if (current_step > 0) {
+                      current_step = current_step - 1;
+                    } else {
+                      current_step = 0;
+                    }
+                  });
+                },
+              )
+            : Center(
+                child: Text(
+                  'Order Cancelled',
+                  style: TextStyle(
+                    color: primary,
+                  ),
+                ),
+              ),
       ),
     );
   }

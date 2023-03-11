@@ -35,7 +35,7 @@ class _MyCartScreenState extends State<MyCartScreen> {
     cartamount = 0;
     FirebaseFirestore.instance
         .collection('Cart')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("products")
         .snapshots()
         .listen((value) {
@@ -84,14 +84,14 @@ class _MyCartScreenState extends State<MyCartScreen> {
   int currentIndex2 = 0;
   final Stream<QuerySnapshot> cartProducts = FirebaseFirestore.instance
       .collection('Cart')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .doc(FirebaseAuth.instance.currentUser?.uid)
       .collection("products")
       .snapshots();
 
   _fetchCartList() {
     FirebaseFirestore.instance
         .collection('Cart')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("products")
         .snapshots()
         .listen((event) {
@@ -365,6 +365,12 @@ class _MyCartScreenState extends State<MyCartScreen> {
                                   'Delivery',
                                   style: bodyText14w600(color: black),
                                 ),
+                                discount > 0
+                                    ? Text(
+                                        'Discount',
+                                        style: bodyText14w600(color: black),
+                                      )
+                                    : SizedBox(),
                                 Text(
                                   'Total',
                                   style: bodyText16w600(color: black),
@@ -435,6 +441,16 @@ class _PriceBoxState extends State<PriceBox> {
                           : false),
                 )
               : SizedBox(),
+          cartList.isNotEmpty && discount > 0
+              ? Text(
+                  'Rs.${widget.cartamount * discount / 100}',
+                  style: bodyText14w600(
+                      color: black,
+                      isShowing: cartList.isNotEmpty && widget.cartamount > 400
+                          ? true
+                          : false),
+                )
+              : SizedBox(),
           cartList.isNotEmpty
               ? Text(
                   'Rs.${(widget.cartamount) - (widget.cartamount) * (discount / 100) + (widget.cartamount <= 400 ? deliveryFee : 0)}',
@@ -474,7 +490,10 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   fetchCurrentAddress() {
     FirebaseFirestore.instance
         .collection('Addresses')
-        .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('customerID',
+            isEqualTo: FirebaseAuth.instance.currentUser != null
+                ? FirebaseAuth.instance.currentUser?.uid
+                : "")
         .get()
         .then((value) {
       currentAddress = value.docs.first.data()["wholeAddress"];
@@ -531,7 +550,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
   fetchUserDetails() {
     userDetails = FirebaseFirestore.instance
         .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         // .where('Number',
         // isEqualTo: FirebaseAuth.instance.currentUser!.phoneNumber)
         .get()
@@ -547,7 +566,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     sendNotification(orderId, "New Order Successful", token);
 
     for (var j in vendorList) {
-      FirebaseFirestore.instance.collection("Orders").doc().set({
+      FirebaseFirestore.instance.collection("Orders").doc(orderId).set({
         "pickupAddress": "",
         "deliveryAddress": currentAddress,
         "uid": FirebaseAuth.instance.currentUser?.uid,
@@ -680,12 +699,14 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
       }
     }
     for (var i in aa.keys) {
+      print(i);
       await FirebaseFirestore.instance
           .collection('vendors')
           .where('cats', arrayContains: int.parse(i))
           .get()
           .then((value) {
         //sort vendors by distance from customer lat long
+        print(value.docs.length);
         if (value.docs.isEmpty) {
           Fluttertoast.showToast(msg: "No Vendor Available");
           return;
@@ -715,6 +736,8 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         }
       });
     }
+    //remove duplicate vendors
+    vendorList = vendorList.toSet().toList();
   }
 
   Future sendNotification(String title, String body, String token) async {
@@ -757,7 +780,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
 
   final Stream<QuerySnapshot> address = FirebaseFirestore.instance
       .collection('Addresses')
-      .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
       .where('isDefault', isEqualTo: true)
       .snapshots();
 

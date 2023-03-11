@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   _fetchCartList() {
     FirebaseFirestore.instance
         .collection('Cart')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("products")
         .snapshots()
         .listen((event) {
@@ -906,7 +906,6 @@ class _HomeProductListWidgetState extends State<HomeProductListWidget> {
   //         ),
   //       );
   //     });
-
 }
 
 // category tile

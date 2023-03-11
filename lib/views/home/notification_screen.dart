@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/utils/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
@@ -8,8 +9,13 @@ import '../../widget/custom_appbar.dart';
 class NotificationScreen extends StatelessWidget {
   NotificationScreen({super.key});
 
-  final Stream<QuerySnapshot> notifications =
-      FirebaseFirestore.instance.collection('userNotification').snapshots();
+  final Stream<QuerySnapshot> notifications = FirebaseFirestore.instance
+      .collection('userNotification')
+      .where('uid',
+          isEqualTo: FirebaseAuth.instance.currentUser != null
+              ? FirebaseAuth.instance.currentUser?.uid
+              : "")
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +55,9 @@ class NotificationScreen extends StatelessWidget {
                       return NotificationTile(
                         title: snapshot.data!.docs[index]['content'],
                         desc: snapshot.data!.docs[index]["createdAt"]
-                            .toDate().toString().substring(0,16),
+                            .toDate()
+                            .toString()
+                            .substring(0, 16),
                         imageURL: "",
                       );
                     },
@@ -62,18 +70,20 @@ class NotificationScreen extends StatelessWidget {
   }
 }
 
-
 class NotificationTile extends StatelessWidget {
   final String imageURL;
   final String title;
   final String desc;
-  const NotificationTile({super.key, required this.imageURL, required this.title, required this.desc});
+  const NotificationTile(
+      {super.key,
+      required this.imageURL,
+      required this.title,
+      required this.desc});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(
-          bottom: 15, left: 5, right: 5, top: 5),
+      margin: const EdgeInsets.only(bottom: 15, left: 5, right: 5, top: 5),
       height: height(context) * 0.1,
       width: width(context) * 0.99,
       decoration: shadowDecoration(10, 1),

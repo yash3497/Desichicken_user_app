@@ -28,7 +28,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
-  var currentUid = FirebaseAuth.instance.currentUser!.uid;
+  var currentUid = FirebaseAuth.instance.currentUser?.uid;
 
   List activeOrderList = [];
   List completedOrderList = [];
@@ -371,7 +371,7 @@ class _MyOrdersDetailsState extends State<MyOrdersDetails> {
                                         ),
                                         addHorizontalySpace(10),
                                         SizedBox(
-                                          height: height(context) * 0.08,
+                                          width: width(context) * .47,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -415,7 +415,7 @@ class _MyOrdersDetailsState extends State<MyOrdersDetails> {
                                             ],
                                           ),
                                         ),
-                                        addHorizontalySpace(30),
+                                        // addHorizontalySpace(10),
                                         Container(
                                           height: 30,
                                           width: width(context) * 0.2,

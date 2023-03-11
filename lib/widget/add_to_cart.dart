@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/services/cart_services.dart';
 import 'package:delicious_app/widget/counter_widget.dart';
+import 'package:delicious_app/widget/login_popup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -63,7 +64,7 @@ class _AddtoCartState extends State<AddtoCart> {
         await _cart.cart.doc(widget.vendorId).collection("products").get();
     await FirebaseFirestore.instance
         .collection("Cart")
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("products")
         .where("productID", isEqualTo: widget.id)
         .where('name', isEqualTo: widget.name)
@@ -97,7 +98,9 @@ class _AddtoCartState extends State<AddtoCart> {
     }
   }
 
-  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final uid = FirebaseAuth.instance.currentUser != null
+      ? FirebaseAuth.instance.currentUser!.uid
+      : "";
 
   @override
   Widget build(BuildContext context) {
@@ -225,6 +228,10 @@ class _AddtoCartState extends State<AddtoCart> {
               )
             : GestureDetector(
                 onTap: (() {
+                  if (FirebaseAuth.instance.currentUser == null) {
+                    showLoginPopup(context);
+                    return;
+                  }
                   Fluttertoast.showToast(
                       msg: "Product added to Cart",
                       toastLength: Toast.LENGTH_SHORT,

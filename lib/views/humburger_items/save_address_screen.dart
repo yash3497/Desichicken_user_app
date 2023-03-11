@@ -10,6 +10,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 import '../../widget/custom_appbar.dart';
+import '../../widget/login_popup.dart';
 
 class SavedAddressScreen extends StatefulWidget {
   SavedAddressScreen({super.key});
@@ -30,13 +31,16 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
 
   final Stream<QuerySnapshot> addresses = FirebaseFirestore.instance
       .collection('Addresses')
-      .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .where('customerID',
+          isEqualTo: FirebaseAuth.instance.currentUser != null
+              ? FirebaseAuth.instance.currentUser?.uid
+              : "")
       .snapshots();
 
   _getDefaultID() {
     FirebaseFirestore.instance
         .collection('Addresses')
-        .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('customerID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .get()
         .then((value) => value.docs.forEach((element) {
               // print(element['name']);
@@ -73,7 +77,7 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
 
                   return GridView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    // physics: const NeverScrollableScrollPhysics(),
                     itemCount: data.size,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -119,8 +123,12 @@ class _SavedAddressScreenState extends State<SavedAddressScreen> {
           CustomButton(
               buttonName: 'Add New Address',
               onClick: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MapScreen()));
+                if (FirebaseAuth.instance.currentUser == null) {
+                  showLoginPopup(context);
+                } else {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MapScreen()));
+                }
               }),
           addVerticalSpace(20)
         ],
