@@ -11,6 +11,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderStatusScreen extends StatefulWidget {
   final Map productDetails;
@@ -264,6 +265,8 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                               InkWell(
                                 onTap: () {
                                   //launch phone dialer
+                                  launch(
+                                      "tel://${widget.productDetails["riderPhone"]}");
                                 },
                                 child: Icon(
                                   Icons.call,
