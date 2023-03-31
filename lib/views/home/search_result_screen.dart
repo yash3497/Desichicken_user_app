@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/utils/constants.dart';
 import 'package:delicious_app/views/humburger_items/add_address_screen.dart';
+import 'package:delicious_app/widget/humburger_screen.dart';
 import 'package:delicious_app/widget/search_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:flutter/material.dart';
 import '../../model/home_categorylist_model.dart';
 import '../categories/vendor_product_screen.dart';
 import '../product_screen.dart';
+
+String searchResults = '';
 
 class SearchResultsScreen extends StatefulWidget {
   final num category;
@@ -45,7 +48,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             : FirebaseFirestore.instance.collection('BestOffers').snapshots()
         : FirebaseFirestore.instance
             .collection('Products')
-            .where('searchCase', arrayContains: widget.search)
+            .where('searchCase', arrayContains: searchResults)
             .snapshots();
     return Scaffold(
       appBar: PreferredSize(
@@ -59,57 +62,53 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/review1.png'),
+                      backgroundImage: NetworkImage(userDetail['image'] ??
+                          'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'),
                     ),
                     addHorizontalySpace(3),
                     Container(
-                      child: StreamBuilder<QuerySnapshot>(
-                          stream: userDetails,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (snapshot.hasError) {
-                              return const Text("Something wrong occured");
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Text("Loading");
-                            }
-
-                            final data = snapshot.requireData;
-                            return Text(/*data.docs[0]['Name']*/ "kk");
-                          }),
+                      child: Text(userDetail['Name'] ?? "kk"),
                     ),
                     Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('Delivery to'),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddNewAddressScreen()));
-                          },
-                          child: StreamBuilder<QuerySnapshot>(
-                              stream: address,
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                if (snapshot.hasError) {
-                                  return const Text("Something wrong occured");
-                                }
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Text("Loading");
-                                }
+                    SizedBox(
+                      width: width(context) * 0.5,
+                      height: 40,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('Delivery to'),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddNewAddressScreen()));
+                            },
+                            child: StreamBuilder(
+                                stream: address,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  if (snapshot.hasError) {
+                                    return const Text(
+                                        "Something wrong occured");
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Text("Loading");
+                                  }
 
-                                final data = snapshot.requireData;
-                                return Text(
-                                    /*data.docs[0]['wholeAddress']*/ "lk");
-                              }),
-                        )
-                      ],
+                                  final data = snapshot.data!;
+                                  print(data.docs.length);
+
+                                  // print(data.docs[0]['wholeAddress']);
+                                  return Text(data.docs.length > 0
+                                      ? data.docs[0]['wholeAddress']
+                                      : "No Address");
+                                }),
+                          )
+                        ],
+                      ),
                     )
                   ],
                 ),
@@ -155,9 +154,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 //         fillColor: const Color.fromRGBO(255, 187, 186, 0.2)),
                 //   ),
                 // ),
-                Center(
-                  child: Image.asset('assets/images/filter.png'),
-                )
+                // Center(
+                //   child: Image.asset('assets/images/filter.png'),
+                // )
               ],
             ),
             addVerticalSpace(15),

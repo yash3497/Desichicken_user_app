@@ -94,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    getCurrentUser();
     fetchCurrentLatLong();
     fillimagelist();
     populateNameList();
@@ -135,6 +136,21 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  getCurrentUser() {
+    userDetail = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .get()
+        .then((value) {
+      log(value.data().toString());
+      userDetail = value.data();
+
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   final Stream<QuerySnapshot> categories =

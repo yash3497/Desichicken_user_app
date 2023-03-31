@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../utils/constants.dart';
 import '../views/home/search_result_screen.dart';
+import '../views/product_screen.dart';
 
 class SearchBar extends StatefulWidget {
   const SearchBar({super.key});
@@ -61,24 +62,22 @@ class _SearchBarState extends State<SearchBar> {
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
                   fontSize: 16.0);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SearchResultsScreen(
-                        category: 2,
-                        exclusive: false,
-                            search: _text,
-                            title: '',
-                          )));
               // Navigator.push(
-              //                       context,
-              //                       MaterialPageRoute(
-              //                           builder: (context) =>
-              //                               SearchProductScreen(
-              //                                 filterIndex:
-              //                                     "selectedSort.four",
-              //                                 search: result.recognizedWords,
-              //                               )));
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (context) => SearchResultsScreen(
+              //           category: 2,
+              //           exclusive: false,
+              //               search: _text,
+              //               title: '',
+              //             )));
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (context) => SearchProductScreen(
+              //               filterIndex: "selectedSort.four",
+              //               search: result.recognizedWords,
+              //             )));
               listening = false;
             }
             if (result.hasConfidenceRating && result.confidence > 0) {
@@ -112,6 +111,18 @@ class _SearchBarState extends State<SearchBar> {
     }
   }
 
+  Future<String> fetchId(String name) async {
+    String id = '';
+    await FirebaseFirestore.instance
+        .collection('Products')
+        .where('name', isEqualTo: name)
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              id = element.id;
+            }));
+    return id;
+  }
+
   List<String> allProductsList = [];
   @override
   void initState() {
@@ -126,7 +137,7 @@ class _SearchBarState extends State<SearchBar> {
         .collection('Products')
         .get()
         .then((value) => value.docs.forEach((element) {
-          // print(element['name']);
+              // print(element['name']);
               allProductsList.add(element['name']);
             }));
   }
@@ -142,8 +153,8 @@ class _SearchBarState extends State<SearchBar> {
       children: [
         Container(
           height: height(context) * 0.05,
-                        width: width(context) * 0.75,
-                        
+          width: width(context) * 0.75,
+
           // decoration: BoxDecoration(
           //     color: Colors.white, borderRadius: BorderRadius.circular(10)),
           child: Autocomplete(
@@ -162,16 +173,26 @@ class _SearchBarState extends State<SearchBar> {
                 return matches;
               }
             },
-            onSelected: (String selection) {
+            onSelected: (String selection) async {
+              searchResults = selection;
+              String id = await fetchId(selection);
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => SearchResultsScreen(
-                        category: 2,
-                        exclusive: false,
-                        search: selection,
-                            title: '',
+                      builder: (ctx) => ProductScreen(
+                            name: selection,
+                            id: id,
+                            productType: 'normal',
                           )));
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (context) => SearchResultsScreen(
+              //               category: 2,
+              //               exclusive: false,
+              //               search: selection,
+              //               title: '',
+              //             )));
               // Navigator.push(
               //     context,
               //     MaterialPageRoute(

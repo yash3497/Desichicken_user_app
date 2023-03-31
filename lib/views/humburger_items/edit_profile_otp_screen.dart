@@ -16,9 +16,13 @@ import '../../widget/humburger_screen.dart';
 class EditProfileOTPVerify extends StatefulWidget {
   final String phonenumber;
   final Map data;
+  final String uid;
 
   EditProfileOTPVerify(
-      {super.key, required this.phonenumber, required this.data});
+      {super.key,
+      required this.phonenumber,
+      required this.data,
+      required this.uid});
 
   @override
   State<EditProfileOTPVerify> createState() => _EditProfileOTPVerifyState();
@@ -53,27 +57,30 @@ class _EditProfileOTPVerifyState extends State<EditProfileOTPVerify> {
     auth.verifyPhoneNumber(
         phoneNumber: "+91$phone",
         verificationCompleted: (PhoneAuthCredential credential) async {
-          auth.signInWithCredential(credential).then((value) async {
-            FirebaseFirestore.instance
-                .collection("Users")
-                .doc(auth.currentUser!.uid)
-                .update({
-              "Email": widget.data["Email"],
-              "Name": widget.data["Name"],
-              "SurName": widget.data["SurName"],
-              "Number": auth.currentUser!.phoneNumber,
-              "userID": auth.currentUser!.uid,
-              "token": msgToken,
-              "image": widget.data["image"],
-            }).then((value) {
-              userDetail['Name'] = widget.data["Name"];
-              userDetail['SurName'] = widget.data["SurName"];
-              userDetail["Email"] = widget.data["Email"];
-              userDetail["image"] = widget.data["image"];
-              userDetail["Number"] = auth.currentUser!.phoneNumber;
-              Navigator.pop(context);
-            });
+          // auth.currentUser!.;
+          print(widget.uid);
+          auth.currentUser!.updatePhoneNumber(credential).then((value) async {
+            print("done");
           });
+          FirebaseFirestore.instance.collection("Users").doc(widget.uid).set({
+            "Email": widget.data["Email"],
+            "Name": widget.data["Name"],
+            "Surname": widget.data["SurName"],
+            "Number": auth.currentUser!.phoneNumber,
+            "userID": auth.currentUser!.uid,
+            "token": msgToken,
+            "image": widget.data["image"],
+          }, SetOptions(merge: true)).then((value) {
+            userDetail['Name'] = widget.data["Name"];
+            userDetail['Surname'] = widget.data["Surname"];
+            userDetail["Email"] = widget.data["Email"];
+            userDetail["image"] = widget.data["image"];
+            userDetail["Number"] = auth.currentUser!.phoneNumber;
+            Navigator.pop(context);
+          });
+          // auth.signInWithCredential(credential).then((value) async {
+
+          // });
         },
         verificationFailed: (FirebaseAuthException exception) {
           // print(exception.message);
@@ -102,22 +109,31 @@ class _EditProfileOTPVerifyState extends State<EditProfileOTPVerify> {
       bool found = false;
       String curruserID = "";
 
-      await auth.signInWithCredential(credential).then((value) async {
-        if (value.user != null) {
-          curruserID = value.user!.uid;
-          FirebaseFirestore.instance
-              .collection("Users")
-              .doc(auth.currentUser!.uid)
-              .update({
-            "Email": widget.data["Email"],
-            "Name": widget.data["Name"],
-            "Number": auth.currentUser!.phoneNumber,
-            "userID": auth.currentUser!.uid,
-            "token": msgToken,
-            "image": widget.data["image"],
-          }).then((value) => Navigator.pop(context));
-        }
+      // await auth.signInWithCredential(credential).then((value) async {
+      // if (value.user != null) {
+      //   curruserID = value.user!.uid;
+      print(widget.uid);
+      auth.currentUser!.updatePhoneNumber(credential).then((value) async {
+        print("done");
       });
+      FirebaseFirestore.instance.collection("Users").doc(widget.uid).set({
+        "Email": widget.data["Email"],
+        "Name": widget.data["Name"],
+        "Surname": widget.data["SurName"],
+        "Number": auth.currentUser!.phoneNumber,
+        "userID": auth.currentUser!.uid,
+        "token": msgToken,
+        "image": widget.data["image"],
+      }, SetOptions(merge: true)).then((value) {
+        userDetail['Name'] = widget.data["Name"];
+        userDetail['Surname'] = widget.data["Surname"];
+        userDetail["Email"] = widget.data["Email"];
+        userDetail["image"] = widget.data["image"];
+        userDetail["Number"] = auth.currentUser!.phoneNumber;
+        Navigator.pop(context);
+      });
+      //   }
+      // });
     } catch (e) {
       FocusScope.of(context).unfocus();
       log(e.toString());

@@ -58,6 +58,7 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) => EditProfileOTPVerify(
+                        uid: auth.currentUser!.uid,
                         phonenumber:
                             mobileController.text.replaceAll("+91", ""),
                         data: {

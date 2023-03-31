@@ -2,11 +2,14 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delicious_app/utils/constants.dart';
+import 'package:delicious_app/views/home/search_screen.dart';
+import 'package:delicious_app/widget/search_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../widget/add_to_cart.dart';
 import '../../widget/custom_gradient_button.dart';
+import '../home/search_result_screen.dart';
 import '../my_cart/cart_tab_screen.dart';
 import '../product_screen.dart';
 
@@ -131,7 +134,22 @@ class _VendorProductScreenState extends State<VendorProductScreen> {
           ),
           actions: [
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Navigator.push(context, MaterialPageRoute(
+                  //   builder: (context) {
+                  //     return const SearchBar();
+                  //   },
+                  // ));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SearchResultsScreen(
+                                exclusive: false,
+                                category: 0,
+                                search: "",
+                                title: '',
+                              )));
+                },
                 icon: Icon(
                   Icons.search,
                   color: primary,
