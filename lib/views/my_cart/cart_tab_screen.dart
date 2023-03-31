@@ -566,6 +566,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
     sendNotification(orderId, "New Order Successful", token);
 
     for (var j in vendorList) {
+      print("VendorId: $j");
       FirebaseFirestore.instance.collection("Orders").doc(orderId).set({
         "pickupAddress": "",
         "deliveryAddress": currentAddress,
@@ -722,9 +723,20 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
               longitude,
               double.parse(b.data()["latitude"].toString()),
               double.parse(b.data()["longitude"].toString()));
+
           return aDistance.compareTo(bDistance);
         });
         //get the nearest vendor
+
+        if (calculateDistance(
+                latitude,
+                longitude,
+                double.parse(value.docs[0].data()["latitude"].toString()),
+                double.parse(value.docs[0].data()["longitude"].toString())) >
+            5) {
+          Fluttertoast.showToast(msg: "No Vendor Available");
+          return;
+        }
         vendorList.add(value.docs[0].id);
         vendorTokenList.add(value.docs[0].data()["token"]);
         if (product[value.docs[0].id] != null) {
@@ -734,6 +746,7 @@ class _OrderPlacedWidgetState extends State<OrderPlacedWidget> {
         } else {
           product[value.docs[0].id] = aa[i];
         }
+        print("Product Details: $product");
       });
     }
     //remove duplicate vendors

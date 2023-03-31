@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:delicious_app/utils/constants.dart';
 import 'package:delicious_app/views/home/home_screen.dart';
 import 'package:delicious_app/views/humburger_items/fill_your_profile_screen.dart';
@@ -74,6 +76,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   _fetchCurrentAddress() async {
+    log("latitude: $latitude");
+    log("longitude: $longitude");
     List<Placemark> placemarks = await placemarkFromCoordinates(
         latitude, longitude,
         localeIdentifier: 'en_IN');
@@ -138,14 +142,14 @@ class _MapScreenState extends State<MapScreen> {
                     var place = await PlacesAutocomplete.show(
                         radius: 10,
                         context: context,
-                        apiKey: 'AIzaSyAuny-ypKqnRF4BRhNtPECpmZcHn3N8mNA',
+                        apiKey: 'AIzaSyACO-bM2g99iSEeT5XU7jYditz2U4RRafs',
                         mode: Mode.overlay,
                         types: [],
                         strictbounds: false,
                         components: [Component(Component.country, 'in')],
                         //google_map_webservice package
                         onError: (err) {
-                          print(err);
+                          print("Places Error: ${err.errorMessage}");
                         });
 
                     if (place != null) {

@@ -57,6 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
       latitude = value.latitude;
       longitude = value.longitude;
 
+      log(latitude.toString());
+      log(longitude.toString());
+
       if (mounted) {
         setState(() {});
       }
@@ -91,10 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    fetchCurrentLatLong();
     fillimagelist();
     populateNameList();
     determinePosition();
-    fetchCurrentLatLong();
+
     fetchToken();
     _fetchCartList();
     super.initState();
